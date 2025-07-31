@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:local_shopee/pages/tap.dart';
+import 'widgets/custom_appbar.dart';
+import 'widgets/card.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -12,11 +13,29 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      home: Scaffold(
+        appBar: customAppbar,
+        body: GridView.count(
+          crossAxisCount: 2,
+          padding: const EdgeInsets.all(20),
+          crossAxisSpacing: 2,
+          mainAxisSpacing: 5,
+          childAspectRatio: 0.7, 
+          children: const [
+          ProductCard(),
+          ProductCard(),
+          ProductCard(),
+          ProductCard(),
+          ProductCard(),
+          ProductCard(),
+          ProductCard(),
+          ProductCard(),
+          
+        ],
+          ),
       ),
-      home: TapBar(),
+
     );
+    
   }
 }
