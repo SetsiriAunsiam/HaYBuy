@@ -32,6 +32,27 @@ PreferredSizeWidget customAppbar({
           )
         )
       ],
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(50),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextField(
+            decoration: InputDecoration(
+              hintText: 'ค้นหาสินค้า...',
+              filled: true,
+              fillColor: Colors.white,
+              prefixIcon: const Icon(Icons.search),
+              contentPadding: const EdgeInsets.symmetric(vertical: 0),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+                borderSide: BorderSide.none,
+              ),
+            ),
+            onChanged: (value) {
+            },
+          ),
+        ),
+      ),
     );
 
 }

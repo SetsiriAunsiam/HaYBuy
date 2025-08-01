@@ -11,8 +11,7 @@ class CartPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final favorites = Provider.of<ProductProvider>(context).favoriteProducts;
 
-     return MaterialApp(
-      home: Scaffold(
+     return  Scaffold(
         body: GridView.builder(
           padding: const EdgeInsets.all(20),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -26,8 +25,6 @@ class CartPage extends StatelessWidget {
             return ProductCard(product: favorites[index]);
           },
         ),
-      ),
-
-    );
+      );
   }
 }
