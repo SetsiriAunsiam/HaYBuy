@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../pages/cart.dart';
 
 PreferredSizeWidget customAppbar({
     required BuildContext context,
@@ -20,17 +19,7 @@ PreferredSizeWidget customAppbar({
             Icons.notification_add,
           )
         ),
-        IconButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const CartPage()),
-            );
-          }, 
-          icon: Icon(
-            Icons.shopping_bag,
-          )
-        )
+       
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(50),
