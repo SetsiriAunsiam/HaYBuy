@@ -1,12 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../models/product.dart';
+import '../providers/product_provider.dart';
 
 class ProductCard extends StatelessWidget {
-  const ProductCard({super.key});
+  final Product product;
+
+  const ProductCard({super.key, required this.product});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Colors.green,
+    final provider = Provider.of<ProductProvider>(context);
+
+    return Card.outlined(
+      // color: Colors.green.withOpacity(0.2),
+      shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12), // if you need this
+      side: BorderSide(
+        color: Colors.grey,
+        width: 1,
+      ),
+    ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -23,38 +37,48 @@ class ProductCard extends StatelessWidget {
             ),
           ),
           Expanded(
+            
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(3.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: const [
+                // mainAxisAlignment: MainAxisAlignment.start,
+                children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'ชื่อสินค้า',
-                        style: TextStyle(
-                          color: Colors.white,
+                        product.name,
+                        style: const TextStyle(
+                          color: Colors.black,
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      Icon(
-                        Icons.favorite_outline,
-                        color: Colors.white,
-                        size: 20,
+                      IconButton(
+                        icon: Icon(
+                          product.isFavorite
+                              ? Icons.favorite
+                              : Icons.favorite_outline,
+                          color: Colors.red,
+                          size: 20,
+                          
+                        ),
+                        onPressed: () {
+                          provider.toggleFavorite(product.id);
+                        },
                       ),
                     ],
                   ),
                   Text(
-                    '฿220',
+                    '฿${product.price}',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Colors.green ,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
+                      
                     ),
                   ),
                   Row(
@@ -62,17 +86,18 @@ class ProductCard extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.location_on,
                             color: Colors.red,
                             size: 15,
                           ),
-                          SizedBox(width: 5),
+                          const SizedBox(width: 5),
                           Text(
-                            'คอหงส์',
-                            style: TextStyle(
-                              color: Colors.white,
+                            product.location,
+                            style: const TextStyle(
+                              color: Colors.black,
                               fontSize: 15,
+                              fontWeight: FontWeight.bold
                             ),
                           ),
                         ],
@@ -80,10 +105,11 @@ class ProductCard extends StatelessWidget {
                       Row(
                         children: [
                           Text(
-                            '5.0',
+                            '${product.rating}',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Colors.black,
                               fontSize: 15,
+                              fontWeight: FontWeight.bold
                             ),
                           ),
                           Icon(

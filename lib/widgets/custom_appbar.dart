@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../pages/cart.dart';
 
-PreferredSizeWidget customAppbar = AppBar(
+PreferredSizeWidget customAppbar(BuildContext context){
+  return AppBar(
   title: Text(
     "Your Title",
     style: TextStyle(
@@ -26,6 +28,20 @@ PreferredSizeWidget customAppbar = AppBar(
         color: Colors.white,
       )
     ),
+    IconButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const CartPage()),
+        );
+      }, 
+      icon: Icon(
+        Icons.shopping_bag,
+        color: Colors.white,
+      )
+    )
   ],
 );
+
+}
 

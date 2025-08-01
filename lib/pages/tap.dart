@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:local_shopee/pages/cart.dart';
+// import 'package:local_shopee/pages/cart.dart';
 import 'package:local_shopee/pages/home.dart';
 import 'package:local_shopee/pages/profile.dart';
 
@@ -29,7 +29,7 @@ class _TapBarState extends State<TapBar> {
           children: [
             HomePage(),
             Center(child: Text('Content for Favorite')),
-            CartPage(),
+            // CartPage(),
             ProfilePage(),
           ],
         ),
