@@ -11,8 +11,8 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final products = Provider.of<ProductProvider>(context).products;
-    return MaterialApp(
-      home: Scaffold(
+    return
+      Scaffold(
         appBar: customAppbar(context),
         body: GridView.builder(
           padding: const EdgeInsets.all(20),
@@ -27,9 +27,7 @@ class HomePage extends StatelessWidget {
             return ProductCard(product: products[index]);
           },
         ),
-      ),
-
-    );
+      );
     
   }
 }

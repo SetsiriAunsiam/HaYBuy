@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:local_shopee/providers/product_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:local_shopee/providers/product_provider.dart';
+import 'providers/navigation_provider.dart';
 
-// import 'widgets/custom_appbar.dart';
+import 'widgets/main_navigation.dart';
 // import 'widgets/card.dart';
 
-import 'pages/home.dart';
+// import 'pages/home.dart';
 void main() {
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => ProductProvider()),
+        ChangeNotifierProvider(create: (context) => NavigationProvider())
         // ChangeNotifierProvider(create: (context) => Product()),
       ],
       child: const MyApp(),
@@ -27,9 +29,23 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false, // ซ่อนแถบ debug
       title: 'My Shop App',
       theme: ThemeData(
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Colors.green,
+          selectedItemColor: Colors.white,
+          unselectedItemColor: Colors.white70,
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.green,
+          iconTheme: IconThemeData(color: Colors.white),
+          titleTextStyle: TextStyle(
+            fontSize: 30,
+            color: Colors.white, 
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         primarySwatch: Colors.green,
       ),
-      home: const HomePage(), // ชี้ไปหน้า Home
+      home: const HomeScreen(), // ชี้ไปหน้า Home
     );
   }
   
