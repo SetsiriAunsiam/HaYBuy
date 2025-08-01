@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:local_shopee/providers/navigation_provider.dart';
+import 'package:local_shopee/widgets/custom_appbar.dart';
 import 'package:provider/provider.dart';
 
 import '../pages/home.dart';
@@ -7,6 +8,13 @@ import '../pages/cart.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+
+  final List<String> appBarTitle = const [
+    "Market",
+    "Search",
+    "Favorite",
+    "Profile"
+  ];
 
   final List<Widget> pages = const [
     HomePage(),
@@ -20,6 +28,7 @@ class HomeScreen extends StatelessWidget {
     final navProvider = Provider.of<NavigationProvider>(context);
 
     return Scaffold(
+      appBar: customAppbar(context: context, title: appBarTitle[navProvider.currentIndex]),
       body: pages[navProvider.currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,

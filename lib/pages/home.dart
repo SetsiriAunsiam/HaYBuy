@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:local_shopee/widgets/custom_appbar.dart';
+// import 'package:local_shopee/widgets/custom_appbar.dart';
 import 'package:local_shopee/widgets/card.dart';
 import 'package:local_shopee/providers/product_provider.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +13,6 @@ class HomePage extends StatelessWidget {
     final products = Provider.of<ProductProvider>(context).products;
     return
       Scaffold(
-        appBar: customAppbar(context),
         body: GridView.builder(
           padding: const EdgeInsets.all(20),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
