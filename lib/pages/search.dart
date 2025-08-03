@@ -1,79 +1,33 @@
+// search_page.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:local_shopee/providers/search_provider.dart';
 
-class SearchPage extends StatefulWidget {
+class SearchPage extends StatelessWidget {
   const SearchPage({super.key});
 
   @override
-  State<SearchPage> createState() => _SearchPageState();
-}
-
-class _SearchPageState extends State<SearchPage> {
-  final TextEditingController _searchController = TextEditingController();
-
-  final List<String> _searchHistory = [
-    'ผักชี',
-    'มังคุด',
-    'ทุเรียน',
-    'ข้าวเหนียว',
-    'ข้าวโพด',
-    'ส้มโอ',
-    'มะม่วง',
-  ];
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  void _addSearchToHistory(String query) {
-    if (query.trim().isEmpty) return;
-
-    setState(() {
-      if (!_searchHistory.contains(query.trim())) {
-        _searchHistory.insert(0, query.trim());
-        if (_searchHistory.length > 5) {
-          _searchHistory.removeLast();
-        }
-      }
-    });
-  }
-
-  void _removeSearchFromHistory(String query) {
-    setState(() {
-      _searchHistory.remove(query);
-    });
-  }
-
-  void _onSearchSubmitted(String query) {
-    _addSearchToHistory(query);
-    // เพิ่มโค้ดค้นหา
-    print('ทำการค้นหา: $query');
-
-    FocusScope.of(context).unfocus();
-  }
-
-  void _onHistoryTapped(String query) {
-    _searchController.text = query;
-    _onSearchSubmitted(query);
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final provider = context.watch<SearchProvider>();
+    final history = provider.searchHistory;
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.lightGreen,
+        // ให้ AppBar สูงพอสำหรับแสดง Chips
+        toolbarHeight: 100,
         title: Padding(
           padding: const EdgeInsets.only(right: 8),
           child: TextField(
-            controller: _searchController,
+            controller: provider.searchController,
+            focusNode: provider.searchFocusNode,
+            textInputAction: TextInputAction.search,
+            onSubmitted: (_) => provider.onSearchSubmitted(),
             decoration: InputDecoration(
               hintText: 'ค้นหาสินค้าที่นี่',
               suffixIcon: IconButton(
                 icon: const Icon(Icons.search, color: Colors.black),
-                onPressed: () {
-                  _onSearchSubmitted(_searchController.text);
-                },
+                onPressed: provider.onSearchSubmitted,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.0),
@@ -81,34 +35,43 @@ class _SearchPageState extends State<SearchPage> {
               ),
               filled: true,
               fillColor: Colors.grey[200],
-              contentPadding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 16.0),
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
             ),
-            onChanged: (value) {
-              setState(() {});
-            },
-            onSubmitted: _onSearchSubmitted,
           ),
         ),
-      ),
-      body:
-          ListView.builder(
-              itemCount: _searchHistory.length,
-              itemBuilder: (context, index) {
-                final String query = _searchHistory[index];
-                return ListTile(
-                  title: Text(query),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.close, color: Colors.grey),
-                    onPressed: () {
-                      _removeSearchFromHistory(query);
-                    },
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(history.isNotEmpty ? 90 : 0),
+          child: Container(
+            height: history.isNotEmpty ? 90 : 0,        // สูงพอ 2 แถว
+            color: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            alignment: Alignment.topLeft,
+            child: history.isEmpty
+                ? const SizedBox.shrink()
+                : Wrap(
+                    spacing: 8,     // ระยะห่างแนวนอน
+                    runSpacing: 4,  // ระยะห่างแนวตั้ง
+                    children: history.map((query) {
+                      return InputChip(
+                        label: Text(query),
+                        onPressed: () => provider.onHistoryTapped(query),
+                        onDeleted: () => provider.removeSearchFromHistory(query),
+                      );
+                    }).toList(),
                   ),
-                  onTap: () {
-                    _onHistoryTapped(query);
-                  },
-                );
-              },
-            ),
+          ),
+        ),
+
+      ),
+      body: Center(
+        child: provider.searchController.text.isEmpty
+            ? const Text('กรอกคำค้นหาแล้วกดค้นหา')
+            : Text(
+                'ผลลัพธ์ของ "${provider.searchController.text}"',
+                style: const TextStyle(fontSize: 18),
+              ),
+      ),
     );
   }
 }

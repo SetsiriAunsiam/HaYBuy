@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:local_shopee/pages/cart.dart';
 import 'package:local_shopee/pages/home.dart';
 import 'package:local_shopee/pages/profile.dart';
+import 'package:local_shopee/pages/search.dart';
 
 class TapBar extends StatefulWidget {
   const TapBar({super.key});
@@ -20,17 +21,17 @@ class _TapBarState extends State<TapBar> {
         bottomNavigationBar: const TabBar(
           tabs: [
             Tab(icon: Icon(Icons.home), text: 'Home'),
-            Tab(icon: Icon(Icons.favorite), text: 'Favorite'),
+            Tab(icon: Icon(Icons.search), text: 'Search'),
             Tab(icon: Icon(Icons.shopping_cart), text: 'Cart'),
             Tab(icon: Icon(Icons.account_circle), text: 'Profile'),
           ],
         ),
-        body: const TabBarView(
+        body: TabBarView(
           children: [
-            HomePage(),
-            Center(child: Text('Content for Favorite')),
-            CartPage(),
-            ProfilePage(),
+            const HomePage(),
+            const SearchPage(),
+            const CartPage(),
+            const ProfilePage(),
           ],
         ),
       ),
