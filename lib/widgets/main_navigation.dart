@@ -12,6 +12,7 @@ class HomeScreen extends StatelessWidget {
   final List<String> appBarTitle = const [
     "Market",
     "Search",
+    "",
     "Favorite",
     "Profile"
   ];
@@ -19,6 +20,7 @@ class HomeScreen extends StatelessWidget {
   final List<Widget> pages = const [
     HomePage(),
     Center(child: Text('Search Page')),
+    SizedBox.shrink(), // Placeholder for the middle button
     CartPage(),
     Center(child: Text('Profile Page')),
   ];
@@ -59,8 +61,11 @@ class HomeScreen extends StatelessWidget {
         // showSelectedLabels: true,
         showUnselectedLabels: false,
         onTap: (index) {
-          if (index == 2) return; // ข้ามปุ่มว่าง
-          navProvider.setIndex(index > 2 ? index - 1 : index);
+          debugPrint("Selected index: $index");
+          debugPrint("Selected nav index: ${navProvider.currentIndex}");
+          if (index == 2) return;
+          navProvider.setIndex(index);
+          // navProvider.setIndex(index);
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home,), label: 'Home'),

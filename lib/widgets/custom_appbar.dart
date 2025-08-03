@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:local_shopee/pages/detail.dart';
+import 'package:local_shopee/pages/favorite.dart';
 
 PreferredSizeWidget customAppbar({
     required BuildContext context,
@@ -8,7 +10,12 @@ PreferredSizeWidget customAppbar({
       title: Text(title),
       actions: actions ??[
         IconButton(
-          onPressed: (){}, 
+          onPressed: (){ 
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const DetailPage()),
+            );
+          }, 
           icon: const Icon(
             Icons.chat,
           )
@@ -17,6 +24,17 @@ PreferredSizeWidget customAppbar({
           onPressed: (){}, 
           icon: const Icon(
             Icons.notification_add,
+          )
+        ),
+        IconButton(
+          onPressed: (){ 
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const FavoritePage()),
+            );
+          }, 
+          icon: const Icon(
+            Icons.favorite_border,
           )
         ),
        
