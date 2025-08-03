@@ -8,10 +8,6 @@ import 'providers/navigation_provider.dart';
 
 import 'widgets/main_navigation.dart';
 
-import 'pages/home.dart';
-// import 'widgets/card.dart';
-
-// import 'pages/home.dart';
 void main() {
   runApp(
     MultiProvider(

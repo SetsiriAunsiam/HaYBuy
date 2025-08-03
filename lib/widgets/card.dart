@@ -12,7 +12,8 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = Provider.of<ProductProvider>(context);
 
-    return Card.outlined(
+    return GestureDetector(
+      child: Card.outlined(
       // color: Colors.green.withOpacity(0.2),
       shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(12), // if you need this
@@ -128,6 +129,12 @@ class ProductCard extends StatelessWidget {
           ),
         ],
       ),
+    ),
+      onTap: () {
+        Navigator.pushNamed(context, '/detail', arguments: product);
+      },
     );
+    
+    
   }
 }
