@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:local_shopee/pages/cart.dart';
+import 'package:local_shopee/pages/detail.dart';
+import 'package:local_shopee/pages/favorite.dart';
 import 'package:provider/provider.dart';
 import 'package:local_shopee/providers/product_provider.dart';
 import 'providers/navigation_provider.dart';
 
 import 'widgets/main_navigation.dart';
+
+import 'pages/home.dart';
 // import 'widgets/card.dart';
 
 // import 'pages/home.dart';
@@ -26,6 +31,15 @@ class MyApp extends StatelessWidget {
    @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      initialRoute: '/',
+      routes: {
+         '/': (context) => const HomeScreen(),
+         '/detail': (context) => const DetailPage(),
+         '/cart': (context) => const CartPage(),
+         '/favorite': (context) => const FavoritePage(),
+      },
+
+
       debugShowCheckedModeBanner: false, // ซ่อนแถบ debug
       title: 'My Shop App',
       theme: ThemeData(
@@ -45,7 +59,7 @@ class MyApp extends StatelessWidget {
         ),
         primarySwatch: Colors.green,
       ),
-      home: const HomeScreen(), // ชี้ไปหน้า Home
+      // home: const HomeScreen(), // ชี้ไปหน้า Home
     );
   }
   

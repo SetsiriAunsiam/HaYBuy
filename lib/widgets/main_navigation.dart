@@ -58,14 +58,13 @@ class HomeScreen extends StatelessWidget {
         selectedItemColor: Colors.green,
         unselectedItemColor: Colors.green,
         currentIndex: navProvider.currentIndex,
-        // showSelectedLabels: true,
         showUnselectedLabels: false,
         onTap: (index) {
           debugPrint("Selected index: $index");
           debugPrint("Selected nav index: ${navProvider.currentIndex}");
           if (index == 2) return;
           navProvider.setIndex(index);
-          // navProvider.setIndex(index);
+
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home,), label: 'Home'),
