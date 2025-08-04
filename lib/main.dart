@@ -5,6 +5,8 @@ import 'package:local_shopee/pages/favorite.dart';
 import 'package:provider/provider.dart';
 import 'package:local_shopee/providers/product_provider.dart';
 import 'providers/navigation_provider.dart';
+import 'providers/search_provider.dart';
+import 'pages/search.dart';
 
 import 'widgets/main_navigation.dart';
 
@@ -13,7 +15,8 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => ProductProvider()),
-        ChangeNotifierProvider(create: (context) => NavigationProvider())
+        ChangeNotifierProvider(create: (context) => NavigationProvider()),
+        ChangeNotifierProvider(create: (context) => SearchProvider()),
         // ChangeNotifierProvider(create: (context) => Product()),
       ],
       child: const MyApp(),
@@ -33,6 +36,7 @@ class MyApp extends StatelessWidget {
          '/detail': (context) => const DetailPage(),
          '/cart': (context) => const CartPage(),
          '/favorite': (context) => const FavoritePage(),
+         '/search': (context) => const SearchPage(),
       },
 
 
