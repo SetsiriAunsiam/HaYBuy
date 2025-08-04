@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:local_shopee/pages/search.dart';
 import 'package:local_shopee/providers/navigation_provider.dart';
 import 'package:local_shopee/widgets/custom_appbar.dart';
 import 'package:provider/provider.dart';
@@ -19,7 +20,7 @@ class HomeScreen extends StatelessWidget {
 
   final List<Widget> pages = const [
     HomePage(),
-    Center(child: Text('Search Page')),
+    SearchPage(),
     SizedBox.shrink(), // Placeholder for the middle button
     CartPage(),
     Center(child: Text('Profile Page')),
@@ -68,7 +69,7 @@ class HomeScreen extends StatelessWidget {
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home,), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Favorite'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
           BottomNavigationBarItem(icon: SizedBox.shrink(), label: ''),
           BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Cart'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
