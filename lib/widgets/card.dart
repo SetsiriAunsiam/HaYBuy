@@ -20,8 +20,8 @@ class ProductCard extends StatelessWidget {
       side: BorderSide(
         color: Colors.grey,
         width: 1,
+       ),
       ),
-    ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
