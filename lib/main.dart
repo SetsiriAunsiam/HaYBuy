@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:local_shopee/pages/cart.dart';
 import 'package:local_shopee/pages/detail.dart';
 import 'package:local_shopee/pages/favorite.dart';
+import 'package:local_shopee/pages/sign_in.dart';
+import 'package:local_shopee/pages/sign_up.dart';
 import 'package:provider/provider.dart';
 import 'package:local_shopee/providers/product_provider.dart';
 import 'providers/navigation_provider.dart';
@@ -10,8 +12,12 @@ import 'providers/search_provider.dart';
 import 'pages/search.dart';
 
 import 'widgets/main_navigation.dart';
+import 'widgets/auth_wrapper.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+
   runApp(
     MultiProvider(
       providers: [
@@ -21,7 +27,7 @@ void main() {
         // ChangeNotifierProvider(create: (context) => Product()),
       ],
       child: const MyApp(),
-    )
+    ),
   );
 }
 
@@ -33,13 +39,15 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       initialRoute: '/',
       routes: {
-         '/': (context) => const HomeScreen(),
-         '/detail': (context) => const DetailPage(),
-         '/cart': (context) => const CartPage(),
-         '/favorite': (context) => const FavoritePage(),
-         '/search': (context) => const SearchPage(),
+        '/': (context) => const AuthWrapper(),
+        '/home': (context) => const HomeScreen(),
+        '/detail': (context) => const DetailPage(),
+        '/cart': (context) => const CartPage(),
+        '/favorite': (context) => const FavoritePage(),
+        '/search': (context) => const SearchPage(),
+        '/signin': (context) => const SignInPage(),
+        '/signup': (context) => const SignUpPage(),
       },
-
 
       debugShowCheckedModeBanner: false, // ซ่อนแถบ debug
       title: 'My Shop App',
@@ -54,7 +62,7 @@ class MyApp extends StatelessWidget {
           iconTheme: IconThemeData(color: Colors.white),
           titleTextStyle: TextStyle(
             fontSize: 30,
-            color: Colors.white, 
+            color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -63,5 +71,4 @@ class MyApp extends StatelessWidget {
       // home: const HomeScreen(), // ชี้ไปหน้า Home
     );
   }
-  
 }

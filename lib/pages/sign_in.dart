@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:local_shopee/pages/sign_up.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -46,6 +45,10 @@ class _SignInPageState extends State<SignInPage> {
             backgroundColor: Colors.green,
           ),
         );
+        // Navigate to home screen after successful sign in
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil('/home', (route) => false);
       }
     } on FirebaseAuthException catch (e) {
       String errorMessage;
@@ -175,11 +178,7 @@ class _SignInPageState extends State<SignInPage> {
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const SignUpPage(),
-                      ),
-                    );
+                    Navigator.of(context).pushNamed('/signup');
                   },
                   child: const Text("Don't have an account? Sign Up"),
                 ),

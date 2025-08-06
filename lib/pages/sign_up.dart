@@ -65,7 +65,10 @@ class _SignUpPageState extends State<SignUpPage> {
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.of(context).pop(); // Go back to sign in page
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/signin',
+          (route) => false,
+        ); // Go back to sign in page
       }
     } on FirebaseAuthException catch (e) {
       String errorMessage;
@@ -207,7 +210,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () {
-                    Navigator.of(context).pop();
+                    Navigator.of(context).pushReplacementNamed('/signin');
                   },
                   child: const Text('Already have an account? Sign In'),
                 ),

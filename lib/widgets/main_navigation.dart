@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../pages/home.dart';
 import '../pages/cart.dart';
+import '../pages/profile.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -15,7 +16,7 @@ class HomeScreen extends StatelessWidget {
     "Search",
     "",
     "Favorite",
-    "Profile"
+    "Profile",
   ];
 
   final List<Widget> pages = const [
@@ -23,7 +24,7 @@ class HomeScreen extends StatelessWidget {
     SearchPage(),
     SizedBox.shrink(), // Placeholder for the middle button
     CartPage(),
-    Center(child: Text('Profile Page')),
+    ProfilePage(), // Replace placeholder with actual ProfilePage
   ];
 
   @override
@@ -31,10 +32,13 @@ class HomeScreen extends StatelessWidget {
     final navProvider = Provider.of<NavigationProvider>(context);
 
     return Scaffold(
-      appBar: customAppbar(context: context, title: appBarTitle[navProvider.currentIndex]),
+      appBar: customAppbar(
+        context: context,
+        title: appBarTitle[navProvider.currentIndex],
+      ),
       body: pages[navProvider.currentIndex],
       floatingActionButton: Container(
-        margin: const EdgeInsets.only(top:10),
+        margin: const EdgeInsets.only(top: 10),
         height: 64,
         width: 64,
         child: FloatingActionButton(
@@ -43,13 +47,9 @@ class HomeScreen extends StatelessWidget {
           onPressed: () => debugPrint("Add button passed"),
           shape: RoundedRectangleBorder(
             side: const BorderSide(width: 3, color: Colors.green),
-            borderRadius: BorderRadius.circular(100)
+            borderRadius: BorderRadius.circular(100),
           ),
-          child: const Icon(
-            Icons.add,
-            color: Colors.green,
-            
-          ),
+          child: const Icon(Icons.add, color: Colors.green),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -65,13 +65,15 @@ class HomeScreen extends StatelessWidget {
           debugPrint("Selected nav index: ${navProvider.currentIndex}");
           if (index == 2) return;
           navProvider.setIndex(index);
-
         },
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home,), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
           BottomNavigationBarItem(icon: SizedBox.shrink(), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Cart'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_cart),
+            label: 'Cart',
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),

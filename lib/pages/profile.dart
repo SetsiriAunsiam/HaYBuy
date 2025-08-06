@@ -14,6 +14,10 @@ class ProfilePage extends StatelessWidget {
             backgroundColor: Colors.green,
           ),
         );
+        // Navigate to sign in page after sign out
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil('/signin', (route) => false);
       }
     } catch (e) {
       if (context.mounted) {
