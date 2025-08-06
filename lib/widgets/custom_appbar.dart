@@ -11,10 +11,10 @@ PreferredSizeWidget customAppbar({
       actions: actions ??[
         IconButton(
           onPressed: (){ 
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const DetailPage()),
-            );
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(builder: (context) => const DetailPage()),
+            // );
           }, 
           icon: const Icon(
             Icons.chat,
