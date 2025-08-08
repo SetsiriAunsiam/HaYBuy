@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/product.dart';
 import '../providers/product_provider.dart';
 
+
 class ProductCard extends StatelessWidget {
   final Product product;
 
@@ -10,7 +11,7 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<ProductProvider>(context);
+    final provider = context.watch<ProductProvider>();
 
     return GestureDetector(
       child: Card.outlined(
@@ -48,16 +49,19 @@ class ProductCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        product.name,
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      Flexible(
+                        child:Text(
+                          product.name  ,
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ), 
                       ),
+                      
                       IconButton(
                         icon: Icon(
                           product.isFavorite
@@ -68,7 +72,7 @@ class ProductCard extends StatelessWidget {
                           
                         ),
                         onPressed: () {
-                          provider.toggleFavorite(product.id);
+                          provider.toggleFavoriteDb(product.id);
                         },
                       ),
                     ],
@@ -79,7 +83,6 @@ class ProductCard extends StatelessWidget {
                       color: Colors.green ,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      
                     ),
                   ),
                   Row(

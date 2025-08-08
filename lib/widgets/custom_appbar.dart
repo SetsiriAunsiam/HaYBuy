@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:local_shopee/pages/detail.dart';
 import 'package:local_shopee/pages/favorite.dart';
 
 PreferredSizeWidget customAppbar({

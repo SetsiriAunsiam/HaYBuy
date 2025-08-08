@@ -8,7 +8,7 @@ class FavoritePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final favorites = Provider.of<ProductProvider>(context).favoriteProducts;
+    final favorites = context.watch<ProductProvider>().favoriteProductsDb;
 
      return  Scaffold(
       appBar: AppBar(
