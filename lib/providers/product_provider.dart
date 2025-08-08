@@ -19,6 +19,7 @@ class ProductProvider with ChangeNotifier {
     Product(id: '7', name: 'Item 7', location: "คอหงศ์", price: Decimal.fromInt(123), rating: Decimal.parse("4.7")),
     Product(id: '8', name: 'Item 8', location: "คอหงศ์", price: Decimal.fromInt(321), rating: Decimal.fromInt(5)),
   ];
+  
   List<Product> get products => _products;
   List<Product> get favoriteProducts => _products.where((p) => p.isFavorite).toList();
 
@@ -29,27 +30,27 @@ class ProductProvider with ChangeNotifier {
 
   ProductProvider() {
     loadProductsFromDb();
-    startListening();
+    // startListening();
   }
 
-  StreamSubscription? _subscription;
-  void startListening() {
-    _subscription = collection.snapshots().listen((snapshot) {
-      _productsDb.clear();
-      for (var doc in snapshot.docs) {
-        final data = doc.data();
-        _productsDb.add(Product(
-          id: doc.id,
-          name: data['name'] ?? 'Unknown',
-          location: data['location'] ?? 'Unknown',
-          price: Decimal.parse(data['price']?.toString() ?? '0'),
-          rating: Decimal.parse(data['rating']?.toString() ?? '0'),
-          isFavorite: data['isFavorite'] ?? false,
-        ));
-      }
-      notifyListeners();
-    });
-  }
+  // StreamSubscription? _subscription;
+  // void startListening() {
+  //   _subscription = collection.snapshots().listen((snapshot) {
+  //     _productsDb.clear();
+  //     for (var doc in snapshot.docs) {
+  //       final data = doc.data();
+  //       _productsDb.add(Product(
+  //         id: doc.id,
+  //         name: data['name'] ?? 'Unknown',
+  //         location: data['location'] ?? 'Unknown',
+  //         price: Decimal.parse(data['price']?.toString() ?? '0'),
+  //         rating: Decimal.parse(data['rating']?.toString() ?? '0'),
+  //         isFavorite: data['isFavorite'] ?? false,
+  //       ));
+  //     }
+  //     notifyListeners();
+  //   });
+  // }
 
   Future<void> loadProductsFromDb() async {
     try {
@@ -72,9 +73,9 @@ class ProductProvider with ChangeNotifier {
     }
   }
 
- void stopListening() {
-    _subscription?.cancel();
-  }
+//  void stopListening() {
+//     _subscription?.cancel();
+//   }
 
   void toggleFavoriteDb(String id) async {
     final index = _productsDb.indexWhere((p) => p.id == id);
