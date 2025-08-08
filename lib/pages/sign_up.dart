@@ -87,16 +87,12 @@ class _SignUpPageState extends State<SignUpPage> {
       switch (e.code) {
         case 'weak-password':
           errorMessage = 'The password provided is too weak.';
-          break;
         case 'email-already-in-use':
           errorMessage = 'The account already exists for that email.';
-          break;
         case 'invalid-email':
           errorMessage = 'The email address is not valid.';
-          break;
         case 'operation-not-allowed':
           errorMessage = 'Email/password accounts are not enabled.';
-          break;
         default:
           errorMessage = 'An error occurred. Please try again.';
       }

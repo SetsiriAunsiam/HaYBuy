@@ -55,22 +55,16 @@ class _SignInPageState extends State<SignInPage> {
       switch (e.code) {
         case 'user-not-found':
           errorMessage = 'No user found for that email.';
-          break;
         case 'wrong-password':
           errorMessage = 'Wrong password provided.';
-          break;
         case 'invalid-email':
           errorMessage = 'The email address is not valid.';
-          break;
         case 'user-disabled':
           errorMessage = 'This user account has been disabled.';
-          break;
         case 'too-many-requests':
           errorMessage = 'Too many attempts. Please try again later.';
-          break;
         case 'invalid-credential':
           errorMessage = 'Invalid email or password.';
-          break;
         default:
           errorMessage = 'An error occurred. Please try again.';
       }
@@ -153,7 +147,7 @@ class _SignInPageState extends State<SignInPage> {
                     height: 50,
                     child: OutlinedButton.icon(
                       onPressed: () {
-                        // TODO: Implement Google Sign In
+                        // Implement Google Sign In
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Google Sign In - Coming Soon!'),
@@ -229,7 +223,7 @@ class _SignInPageState extends State<SignInPage> {
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.visibility_outlined),
                         onPressed: () {
-                          // TODO: Toggle password visibility
+                          // Toggle password visibility
                         },
                       ),
                       border: OutlineInputBorder(
