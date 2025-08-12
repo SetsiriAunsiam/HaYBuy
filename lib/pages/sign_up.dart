@@ -190,6 +190,10 @@ class SignUpPage extends StatelessWidget {
                       _showMessage(context, "Please fill in all fields");
                       return;
                     }
+                    if (!email.contains('@')) {
+                      _showMessage(context, "Invalid email format");
+                      return;
+                    }
                     if (password != confirmPassword) {
                       _showMessage(context, "Passwords do not match");
                       return;
