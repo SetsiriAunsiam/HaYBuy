@@ -16,6 +16,8 @@ class ProductProvider with ChangeNotifier {
   DocumentSnapshot? _lastDocument; 
   bool _hasMore = true;
 
+  bool get hasmore => _hasMore;
+
   final List<Product> _productsDb = [];
   List<Product> get productsDb => _productsDb;
 

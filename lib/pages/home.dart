@@ -11,7 +11,6 @@ class HomePage extends StatelessWidget {
     final productsDb = context.watch<ProductProvider>().productsDb;
     return
       Scaffold(
-        
         body: NotificationListener<ScrollNotification>(
           onNotification: (scrollNotification) {
             if (scrollNotification.metrics.pixels == scrollNotification.metrics.maxScrollExtent) {
@@ -19,10 +18,10 @@ class HomePage extends StatelessWidget {
               return true;
             }
 
-            if (scrollNotification.metrics.pixels == 0) {
-              context.read<ProductProvider>().refreshProducts();
-              return true;
-            }
+            // if (scrollNotification.metrics.pixels == 0) {
+            //   context.read<ProductProvider>().refreshProducts();
+            //   return true;
+            // }
             return false;
           },
           child: RefreshIndicator(
@@ -36,6 +35,9 @@ class HomePage extends StatelessWidget {
                 ),
                 itemCount: productsDb.length,
                 itemBuilder: (context, index) {
+                  if (index == productsDb.length - 1 && context.read<ProductProvider>().hasmore) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
                   return ProductCard(product: productsDb[index]);
                 },
               ),
