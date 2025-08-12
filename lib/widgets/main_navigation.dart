@@ -48,7 +48,7 @@ class HomeScreen extends StatelessWidget {
           backgroundColor: Colors.white,
           elevation: 0,
           onPressed: () {
-            productProvider.addProduct();
+            productProvider.addTestProduct();
           },
           shape: RoundedRectangleBorder(
             side: const BorderSide(width: 3, color: Colors.green),

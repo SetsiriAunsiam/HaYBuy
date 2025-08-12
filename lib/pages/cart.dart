@@ -9,7 +9,7 @@ class CartPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final favorites = Provider.of<ProductProvider>(context).favoriteProductsDb;
+    // final favorites = Provider.of<ProductProvider>(context).favoriteProductsDb;
 
      return  Scaffold(
         body: GridView.builder(
@@ -20,9 +20,10 @@ class CartPage extends StatelessWidget {
             mainAxisSpacing: 5,
             childAspectRatio: 0.7,
           ),
-          itemCount: favorites.length,
+          // itemCount: favorites.length,
           itemBuilder: (context, index) {
-            return ProductCard(product: favorites[index]);
+            // return ProductCard(product: favorites[index]);
+            return null;
           },
         ),
       );

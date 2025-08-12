@@ -11,7 +11,7 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<ProductProvider>();
+    // final provider = context.watch<ProductProvider>();
 
     return GestureDetector(
       child: Card.outlined(
@@ -64,15 +64,16 @@ class ProductCard extends StatelessWidget {
                       
                       IconButton(
                         icon: Icon(
-                          product.isFavorite
-                              ? Icons.favorite
-                              : Icons.favorite_outline,
+                          // product.isFavorite
+                          //     ? Icons.favorite
+                          //     : Icons.favorite_outline,
+                          Icons.favorite_outline,
                           color: Colors.red,
                           size: 20,
                           
                         ),
                         onPressed: () {
-                          provider.toggleFavoriteDb(product.id);
+
                         },
                       ),
                     ],
@@ -97,7 +98,7 @@ class ProductCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 5),
                           Text(
-                            product.location,
+                            'คอหงส์',
                             style: const TextStyle(
                               color: Colors.black,
                               fontSize: 15,

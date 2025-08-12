@@ -8,7 +8,7 @@ class FavoritePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final favorites = context.watch<ProductProvider>().favoriteProductsDb;
+    // final favorites = context.watch<ProductProvider>().favoriteProductsDb;
 
      return  Scaffold(
       appBar: AppBar(
@@ -22,9 +22,10 @@ class FavoritePage extends StatelessWidget {
             mainAxisSpacing: 5,
             childAspectRatio: 0.7,
           ),
-          itemCount: favorites.length,
+          // itemCount: favorites.length,
           itemBuilder: (context, index) {
-            return ProductCard(product: favorites[index]);
+            // return ProductCard(product: favorites[index]);
+            return null;
           },
         ),
         
