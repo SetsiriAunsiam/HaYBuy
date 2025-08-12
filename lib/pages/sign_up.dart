@@ -428,7 +428,7 @@ class SignUpPage extends StatelessWidget {
 
                       // Navigate to home or login page
                       if (context.mounted) {
-                        Navigator.pushReplacementNamed(context, '/login');
+                        Navigator.pushReplacementNamed(context, '/signin');
                       }
                     } on FirebaseAuthException catch (e) {
                       String errorMsg = "เกิดข้อผิดพลาด";

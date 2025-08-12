@@ -1,77 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
-import '../providers/product_provider.dart';
-import '../widgets/card.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
-  @override
-  State<ProfilePage> createState() => _ProfilePageState();
-}
+  // ValueNotifier สำหรับจัดการสถานะการเลือกแท็บ
+  static final ValueNotifier<bool> _showUserProducts = ValueNotifier<bool>(
+    true,
+  ); // true = รถเข็น, false = หัวใจ
 
-class _ProfilePageState extends State<ProfilePage>
-    with TickerProviderStateMixin {
-  bool _showUserProducts = true; // true = สินค้าที่ลงขาย, false = สินค้าโปรด
-  AnimationController? _animationController;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _animationController?.forward();
-  }
-
-  @override
-  void dispose() {
-    _animationController?.dispose();
-    super.dispose();
-  }
-
-  Future<void> _signOut(BuildContext context) async {
-    try {
-      await FirebaseAuth.instance.signOut();
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Successfully signed out'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        // Navigate to sign in page after sign out
-        Navigator.of(
-          context,
-        ).pushNamedAndRemoveUntil('/signin', (route) => false);
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Error signing out'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+  Future<Map<String, dynamic>?> getUserData() async {
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+    DocumentSnapshot doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
+    if (doc.exists) {
+      return doc.data() as Map<String, dynamic>;
     }
+    return null;
+  }
+
+  int calculateAge(Timestamp dateOfBirth) {
+    DateTime birthDate = dateOfBirth.toDate();
+    DateTime today = DateTime.now();
+    int age = today.year - birthDate.year;
+
+    // ตรวจสอบว่าวันเกิดผ่านไปแล้วในปีนี้หรือยัง
+    if (today.month < birthDate.month ||
+        (today.month == birthDate.month && today.day < birthDate.day)) {
+      age--;
+    }
+
+    return age;
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    final productProvider = Provider.of<ProductProvider>(context);
-
-    // สำหรับตัวอย่าง จะใช้ products ทั้งหมดเป็นสินค้าที่ลงขาย และ favoriteProducts เป็นสินค้าโปรด
-    final userProducts = productProvider.productsDb;
-    final favoriteProducts = productProvider.favoriteProductsDb;
-    final displayProducts = _showUserProducts ? userProducts : favoriteProducts;
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('โปรไฟล์'),
+        title: const Text("โปรไฟล์"),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
@@ -80,28 +49,7 @@ class _ProfilePageState extends State<ProfilePage>
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'logout') {
-                _signOut(context);
-              }
-            },
-            itemBuilder: (BuildContext context) {
-              return [
-                const PopupMenuItem<String>(
-                  value: 'logout',
-                  child: Row(
-                    children: [
-                      Icon(Icons.logout, color: Colors.red),
-                      SizedBox(width: 8),
-                      Text('ออกจากระบบ'),
-                    ],
-                  ),
-                ),
-              ];
-            },
-          ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'logout') {
-                _signOut(context);
+                FirebaseAuth.instance.signOut();
               }
             },
             itemBuilder: (BuildContext context) {
@@ -122,192 +70,195 @@ class _ProfilePageState extends State<ProfilePage>
         ],
       ),
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          // Profile Header
-          Container(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                // Profile Avatar
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.person, size: 40, color: Colors.grey),
-                ),
-                const SizedBox(height: 12),
+      body: FutureBuilder<Map<String, dynamic>?>(
+        future: getUserData(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text("Error: ${snapshot.error}"));
+          }
+          if (!snapshot.hasData || snapshot.data == null) {
+            return const Center(child: Text("No user data found"));
+          }
 
-                // Username
-                Text(
-                  user?.email?.split('@')[0] ?? 'เพมรหัวงด',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Stats Row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+          var userData = snapshot.data!;
+          return Column(
+            children: [
+              // Profile Header
+              Container(
+                padding: const EdgeInsets.all(20),
+                child: Column(
                   children: [
-                    _buildStatColumn('${userProducts.length}', 'เรทติ้ง'),
-                    const SizedBox(width: 40),
-                    _buildStatColumn('${favoriteProducts.length}', 'ผู้ติดตาม'),
-                  ],
-                ),
-                const SizedBox(height: 20),
-
-                // Action Buttons (หลอกๆ ไม่เชื่อมกับการทำงาน)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildFakeActionButton('ติดตาม'),
-                    const SizedBox(width: 16),
-                    _buildFakeActionButton('พูดคุย'),
-                  ],
-                ),
-                const SizedBox(height: 20),
-
-                // Icons Row - Cart and Heart with underline and animation
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Cart Icon (for user products)
-                    GestureDetector(
-                      onTap: () {
-                        setState(() => _showUserProducts = true);
-                        _animationController?.reset();
-                        _animationController?.forward();
-                      },
-                      child: Column(
-                        children: [
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            curve: Curves.easeInOut,
-                            child: Icon(
-                              Icons.shopping_cart_outlined,
-                              size: 30,
-                              color: Colors.black,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
-                            height: 3,
-                            width: _showUserProducts ? 40 : 0,
-                            decoration: BoxDecoration(
-                              color: Colors.green,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        ],
+                    // Profile Avatar
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.person,
+                        size: 40,
+                        color: Colors.grey,
                       ),
                     ),
-                    const SizedBox(width: 60),
-                    // Heart Icon (for favorite products)
-                    GestureDetector(
-                      onTap: () {
-                        setState(() => _showUserProducts = false);
-                        _animationController?.reset();
-                        _animationController?.forward();
-                      },
-                      child: Column(
-                        children: [
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            curve: Curves.easeInOut,
-                            child: Icon(
-                              Icons.favorite_outline,
-                              size: 30,
-                              color: Colors.black,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
-                            height: 3,
-                            width: !_showUserProducts ? 40 : 0,
-                            decoration: BoxDecoration(
-                              color: Colors.green,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        ],
+                    const SizedBox(height: 12),
+
+                    // Username
+                    Text(
+                      userData['fullName'] ?? 'ไม่ระบุชื่อ',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+                    const SizedBox(height: 16),
 
-          const Divider(thickness: 1),
-
-          // Products Grid with Animation
-          Expanded(
-            child: displayProducts.isEmpty
-                ? const Center(
-                    child: Text(
-                      'ไม่มีสินค้า',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    // Stats Row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _buildStatColumn('5', 'เรทติ้ง'),
+                        const SizedBox(width: 40),
+                        _buildStatColumn('10', 'ผู้ติดตาม'),
+                      ],
                     ),
-                  )
-                : AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 400),
-                    transitionBuilder:
-                        (Widget child, Animation<double> animation) {
-                          return FadeTransition(
-                            opacity: animation,
-                            child: SlideTransition(
-                              position:
-                                  Tween<Offset>(
-                                    begin: const Offset(0.2, 0),
-                                    end: Offset.zero,
-                                  ).animate(
-                                    CurvedAnimation(
-                                      parent: animation,
-                                      curve: Curves.easeInOut,
+                    const SizedBox(height: 20),
+
+                    // Action Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _buildActionButton('ติดตาม'),
+                        const SizedBox(width: 16),
+                        _buildActionButton('พูดคุย'),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Icons Row - Cart and Heart with underline and animation
+                    ValueListenableBuilder<bool>(
+                      valueListenable: _showUserProducts,
+                      builder: (context, showUserProducts, child) {
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Cart Icon (for user products)
+                            GestureDetector(
+                              onTap: () {
+                                _showUserProducts.value = true;
+                              },
+                              child: Column(
+                                children: [
+                                  AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    curve: Curves.easeInOut,
+                                    child: Icon(
+                                      Icons.shopping_cart_outlined,
+                                      size: 30,
+                                      color: Colors.black,
                                     ),
                                   ),
-                              child: child,
+                                  const SizedBox(height: 8),
+                                  AnimatedContainer(
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInOut,
+                                    height: 3,
+                                    width: showUserProducts ? 40 : 0,
+                                    decoration: BoxDecoration(
+                                      color: Colors.green,
+                                      borderRadius: BorderRadius.circular(2),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          );
-                        },
-                    child: Padding(
-                      key: ValueKey(
-                        _showUserProducts,
-                      ), // Key สำหรับ AnimatedSwitcher
-                      padding: const EdgeInsets.all(16),
-                      child: GridView.builder(
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              childAspectRatio: 0.75,
-                              crossAxisSpacing: 12,
-                              mainAxisSpacing: 12,
+                            const SizedBox(width: 60),
+                            // Heart Icon (for favorite products)
+                            GestureDetector(
+                              onTap: () {
+                                _showUserProducts.value = false;
+                              },
+                              child: Column(
+                                children: [
+                                  AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    curve: Curves.easeInOut,
+                                    child: Icon(
+                                      Icons.favorite_outline,
+                                      size: 30,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  AnimatedContainer(
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInOut,
+                                    height: 3,
+                                    width: !showUserProducts ? 40 : 0,
+                                    decoration: BoxDecoration(
+                                      color: Colors.green,
+                                      borderRadius: BorderRadius.circular(2),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                        itemCount: displayProducts.length,
-                        itemBuilder: (context, index) {
-                          return AnimatedContainer(
-                            duration: Duration(
-                              milliseconds: 100 + (index * 50),
-                            ),
-                            curve: Curves.easeOutBack,
-                            child: ProductCard(product: displayProducts[index]),
-                          );
-                        },
-                      ),
+                          ],
+                        );
+                      },
                     ),
-                  ),
-          ),
-        ],
+                  ],
+                ),
+              ),
+
+              const Divider(thickness: 1),
+
+              // Content area with AnimatedSwitcher
+              Expanded(
+                child: ValueListenableBuilder<bool>(
+                  valueListenable: _showUserProducts,
+                  builder: (context, showUserProducts, child) {
+                    return AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 400),
+                      transitionBuilder:
+                          (Widget child, Animation<double> animation) {
+                            return FadeTransition(
+                              opacity: animation,
+                              child: SlideTransition(
+                                position:
+                                    Tween<Offset>(
+                                      begin: const Offset(0.2, 0),
+                                      end: Offset.zero,
+                                    ).animate(
+                                      CurvedAnimation(
+                                        parent: animation,
+                                        curve: Curves.easeInOut,
+                                      ),
+                                    ),
+                                child: child,
+                              ),
+                            );
+                          },
+                      child: Padding(
+                        key: ValueKey(
+                          showUserProducts,
+                        ), // Key สำหรับ AnimatedSwitcher
+                        padding: const EdgeInsets.all(16),
+                        child: showUserProducts
+                            ? _buildUserProductsGrid()
+                            : _buildFavoriteProductsGrid(),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -324,13 +275,10 @@ class _ProfilePageState extends State<ProfilePage>
     );
   }
 
-  Widget _buildFakeActionButton(String text) {
+  Widget _buildActionButton(String text) {
     return ElevatedButton(
       onPressed: () {
         // ปุ่มหลอกๆ ไม่ทำอะไร
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$text - ฟีเจอร์นี้ยังไม่พร้อมใช้งาน')),
-        );
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.grey[200],
@@ -340,6 +288,135 @@ class _ProfilePageState extends State<ProfilePage>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
       child: Text(text),
+    );
+  }
+
+  Widget _buildUserProductsGrid() {
+    return GridView.builder(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.75,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+      ),
+      itemCount: 4, // จำนวน placeholder cards สำหรับสินค้าที่ลงขาย
+      itemBuilder: (context, index) {
+        return _buildProductCard(
+          title: 'สินค้าของฉัน ${index + 1}',
+          price: '฿${220 + (index * 50)}',
+          isUserProduct: true,
+        );
+      },
+    );
+  }
+
+  Widget _buildFavoriteProductsGrid() {
+    return GridView.builder(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.75,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+      ),
+      itemCount: 2, // จำนวน placeholder cards สำหรับสินค้าโปรด
+      itemBuilder: (context, index) {
+        return _buildProductCard(
+          title: 'สินค้าโปรด ${index + 1}',
+          price: '฿${180 + (index * 40)}',
+          isUserProduct: false,
+        );
+      },
+    );
+  }
+
+  Widget _buildProductCard({
+    required String title,
+    required String price,
+    required bool isUserProduct,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                ),
+              ),
+              child: Center(
+                child: Icon(
+                  isUserProduct ? Icons.store : Icons.favorite,
+                  size: 40,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Icon(
+                        Icons.favorite_outline,
+                        size: 16,
+                        color: Colors.green,
+                      ),
+                    ],
+                  ),
+                  Text(
+                    price,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                    ),
+                  ),
+                  const Spacer(),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on, size: 12, color: Colors.grey),
+                      const Text(
+                        '0.5 กิโลเมตร',
+                        style: TextStyle(fontSize: 10, color: Colors.grey),
+                      ),
+                      const Spacer(),
+                      Icon(Icons.star, size: 12, color: Colors.orange),
+                      const Text(
+                        '5.0',
+                        style: TextStyle(fontSize: 10, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
