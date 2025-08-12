@@ -98,6 +98,27 @@ class _ProfilePageState extends State<ProfilePage>
               ];
             },
           ),
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'logout') {
+                _signOut(context);
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              return [
+                const PopupMenuItem<String>(
+                  value: 'logout',
+                  child: Row(
+                    children: [
+                      Icon(Icons.logout, color: Colors.red),
+                      SizedBox(width: 8),
+                      Text('ออกจากระบบ'),
+                    ],
+                  ),
+                ),
+              ];
+            },
+          ),
         ],
       ),
       backgroundColor: Colors.white,
