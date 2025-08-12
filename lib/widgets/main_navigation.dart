@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:local_shopee/pages/search.dart';
 import 'package:local_shopee/providers/navigation_provider.dart';
+import 'package:local_shopee/providers/product_provider.dart';
 import 'package:local_shopee/widgets/custom_appbar.dart';
 import 'package:provider/provider.dart';
 
@@ -30,6 +31,8 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final navProvider = Provider.of<NavigationProvider>(context);
+    final productProvider = Provider.of<ProductProvider>(context);
+
 
     return Scaffold(
       appBar: customAppbar(
@@ -44,7 +47,9 @@ class HomeScreen extends StatelessWidget {
         child: FloatingActionButton(
           backgroundColor: Colors.white,
           elevation: 0,
-          onPressed: () => debugPrint("Add button passed"),
+          onPressed: () {
+            productProvider.addProduct();
+          },
           shape: RoundedRectangleBorder(
             side: const BorderSide(width: 3, color: Colors.green),
             borderRadius: BorderRadius.circular(100),

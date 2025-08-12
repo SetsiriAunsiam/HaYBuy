@@ -65,8 +65,8 @@ class _ProfilePageState extends State<ProfilePage>
     final productProvider = Provider.of<ProductProvider>(context);
 
     // สำหรับตัวอย่าง จะใช้ products ทั้งหมดเป็นสินค้าที่ลงขาย และ favoriteProducts เป็นสินค้าโปรด
-    final userProducts = productProvider.products;
-    final favoriteProducts = productProvider.favoriteProducts;
+    final userProducts = productProvider.productsDb;
+    final favoriteProducts = productProvider.favoriteProductsDb;
     final displayProducts = _showUserProducts ? userProducts : favoriteProducts;
 
     return Scaffold(

@@ -9,7 +9,7 @@ class CartPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final favorites = Provider.of<ProductProvider>(context).favoriteProducts;
+    final favorites = Provider.of<ProductProvider>(context).favoriteProductsDb;
 
      return  Scaffold(
         body: GridView.builder(

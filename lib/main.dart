@@ -6,10 +6,11 @@ import 'package:local_shopee/pages/favorite.dart';
 import 'package:local_shopee/pages/sign_in.dart';
 import 'package:local_shopee/pages/sign_up.dart';
 import 'package:provider/provider.dart';
-import 'package:local_shopee/providers/product_provider.dart';
-import 'providers/navigation_provider.dart';
-import 'providers/search_provider.dart';
 import 'pages/search.dart';
+
+import 'package:local_shopee/providers/product_provider.dart';
+import 'package:local_shopee/providers/navigation_provider.dart';
+import 'package:local_shopee/providers/search_provider.dart';
 
 import 'widgets/main_navigation.dart';
 import 'widgets/auth_wrapper.dart';
@@ -24,7 +25,6 @@ void main() async {
         ChangeNotifierProvider(create: (context) => ProductProvider()),
         ChangeNotifierProvider(create: (context) => NavigationProvider()),
         ChangeNotifierProvider(create: (context) => SearchProvider()),
-        // ChangeNotifierProvider(create: (context) => Product()),
       ],
       child: const MyApp(),
     ),
