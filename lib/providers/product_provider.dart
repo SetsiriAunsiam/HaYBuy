@@ -1,4 +1,5 @@
 import 'dart:async';
+// import 'dart:math';
 
 import 'package:flutter/material.dart';
 import '../models/product.dart';
@@ -11,12 +12,16 @@ class ProductProvider with ChangeNotifier {
   final collection = FirebaseFirestore.instance.collection("products");
   final user = FirebaseAuth.instance.currentUser;
 
+  final int _limit = 10;
+  DocumentSnapshot? _lastDocument; 
+  bool _hasMore = true;
+
   final List<Product> _productsDb = [];
   List<Product> get productsDb => _productsDb;
-  List<Product> get favoriteProductsDb => _productsDb.where((p) => p.id == user?.uid && p.isFavorite).toList();
+  List<Product> get favoriteProductsDb => _productsDb.where((p) => p.isFavorite).toList();
 
   ProductProvider() {
-    loadProductsFromDb();
+    loadMoreProducts();
     // startListening();
   }
 
@@ -39,25 +44,59 @@ class ProductProvider with ChangeNotifier {
   //   });
   // }
 
-  Future<void> loadProductsFromDb() async {
-    try {
-      final snapshot = await collection.get();
-      _productsDb.clear();
+
+  Future<void> loadMoreProducts() async {
+    if (!_hasMore) return;
+    Query query = collection.orderBy('name').limit(_limit);
+    if (_lastDocument != null) {
+      query = query.startAfterDocument(_lastDocument!);
+    }
+    final snapshot = await query.get();
+    print('Load products: new docs ${snapshot.docs.length}');
+    print('Current productsDb length: ${_productsDb.length}');  
+
+    if (snapshot.docs.isNotEmpty) {
+      _lastDocument = snapshot.docs.last;
       for (var doc in snapshot.docs) {
-        final data = doc.data();
-        _productsDb.add(Product(
-          id: doc.id,
-          name: data['name'] ?? 'Unknown',
-          location: data['location'] ?? 'Unknown',
-          price: Decimal.parse(data['price']?.toString() ?? '0'),
-          rating: Decimal.parse(data['rating']?.toString() ?? '0'),
-          isFavorite: data['isFavorite'] ?? false,
-        ));
+        final existingIndex = _productsDb.indexWhere((p) => p.id == doc.id);
+        if (existingIndex == -1) {
+          final data = doc.data() as Map<String, dynamic>;
+          _productsDb.add(Product(
+            id: doc.id,
+            name: data['name'] ?? 'Unknown',
+            location: data['location'] ?? 'Unknown',
+            price: Decimal.parse(data['price']?.toString() ?? '0'),
+            rating: Decimal.parse(data['rating']?.toString() ?? '0'),
+            isFavorite: data['isFavorite'] ?? false,
+          ));
+        }
       }
       notifyListeners();
-    } catch (e) {
-      print('Error loading products: $e');
+      if(snapshot.docs.length < _limit) {
+        _hasMore = false;
+      }
+    } else {
+      _hasMore = false;
     }
+
+    // try {
+    //   final snapshot = await collection.get();
+    //   _productsDb.clear();
+    //   for (var doc in snapshot.docs) {
+    //     final data = doc.data();
+    //     _productsDb.add(Product(
+    //       id: doc.id,
+    //       name: data['name'] ?? 'Unknown',
+    //       location: data['location'] ?? 'Unknown',
+    //       price: Decimal.parse(data['price']?.toString() ?? '0'),
+    //       rating: Decimal.parse(data['rating']?.toString() ?? '0'),
+    //       isFavorite: data['isFavorite'] ?? false,
+    //     ));
+    //   }
+    //   notifyListeners();
+    // } catch (e) {
+    //   print('Error loading products: $e');
+    // }
   }
 
 //  void stopListening() {
@@ -70,6 +109,7 @@ class ProductProvider with ChangeNotifier {
 
     _productsDb[index].isFavorite = !_productsDb[index].isFavorite;
     notifyListeners();
+    print(_productsDb.length);
 
     final item = collection.doc(id);
     final doc = await item.get();

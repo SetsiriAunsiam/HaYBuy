@@ -12,7 +12,15 @@ class HomePage extends StatelessWidget {
     return
       Scaffold(
         
-        body: GridView.builder(
+        body: NotificationListener<ScrollNotification>(
+          onNotification: (scrollNotification) {
+            if (scrollNotification.metrics.pixels == scrollNotification.metrics.maxScrollExtent) {
+              context.read<ProductProvider>().loadMoreProducts();
+              return true;
+            }
+            return false;
+          },
+          child: GridView.builder(
                 padding: const EdgeInsets.all(20),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
@@ -25,6 +33,11 @@ class HomePage extends StatelessWidget {
                   return ProductCard(product: productsDb[index]);
                 },
               ),
+
+        )
+        
+        
+              
         
       );
     
