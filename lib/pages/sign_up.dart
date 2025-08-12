@@ -23,6 +23,22 @@ class SignUpPage extends StatelessWidget {
             children: [
               const SizedBox(height: 60),
 
+              // HaYBuy Icon/Logo
+              Container(
+                width: 100,
+                height: 100,
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4CAF50),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Icon(
+                  Icons.storefront,
+                  size: 50,
+                  color: Colors.white,
+                ),
+              ),
+
               // HaYBuy Logo/Title
               const Text(
                 "HaYBuy",
@@ -33,7 +49,15 @@ class SignUpPage extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 60),
+              const SizedBox(height: 8),
+
+              // Subtitle
+              const Text(
+                "ซื้อ ขาย และเชื่อมโยงกับชุมชนของคุณ",
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 50),
 
               // อีเมล label
               const Text(
