@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignUpPage extends StatelessWidget {
   SignUpPage({super.key});
@@ -8,8 +9,12 @@ class SignUpPage extends StatelessWidget {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
+  final TextEditingController fullNameController = TextEditingController();
 
   final ValueNotifier<bool> _isPasswordVisible = ValueNotifier<bool>(false);
+  final ValueNotifier<DateTime?> _selectedDate = ValueNotifier<DateTime?>(null);
+  final ValueNotifier<String> _selectedGender = ValueNotifier<String>('');
+  final ValueNotifier<String?> _profileImagePath = ValueNotifier<String?>(null);
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +64,38 @@ class SignUpPage extends StatelessWidget {
               ),
               const SizedBox(height: 50),
 
+              // ชื่อ-สกุล label
+              const Text(
+                "ชื่อ-สกุล",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              // Full Name field
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F5F5),
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: TextField(
+                  controller: fullNameController,
+                  decoration: const InputDecoration(
+                    hintText: "ชื่อ-สกุล",
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
+                    prefixIcon: Icon(Icons.person_outline, color: Colors.grey),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
               // อีเมล label
               const Text(
                 "อีเมล",
@@ -88,6 +125,70 @@ class SignUpPage extends StatelessWidget {
                     prefixIcon: Icon(Icons.email_outlined, color: Colors.grey),
                   ),
                   keyboardType: TextInputType.emailAddress,
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // วันเดือนปีเกิด label
+              const Text(
+                "วันเดือนปีเกิด",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              // Date of Birth field
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F5F5),
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: ValueListenableBuilder<DateTime?>(
+                  valueListenable: _selectedDate,
+                  builder: (context, selectedDate, child) {
+                    return GestureDetector(
+                      onTap: () async {
+                        final DateTime? picked = await showDatePicker(
+                          context: context,
+                          initialDate: selectedDate ?? DateTime.now(),
+                          firstDate: DateTime(1900),
+                          lastDate: DateTime.now(),
+                        );
+                        if (picked != null) {
+                          _selectedDate.value = picked;
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 16,
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.calendar_today_outlined,
+                              color: Colors.grey,
+                            ),
+                            const SizedBox(width: 16),
+                            Text(
+                              selectedDate != null
+                                  ? "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}"
+                                  : "เลือกวันเดือนปีเกิด",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: selectedDate != null
+                                    ? Colors.black
+                                    : Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 20),
@@ -196,7 +297,59 @@ class SignUpPage extends StatelessWidget {
                   },
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
+
+              // เพศ label
+              const Text(
+                "เพศ",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              // Gender field
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F5F5),
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: ValueListenableBuilder<String>(
+                  valueListenable: _selectedGender,
+                  builder: (context, selectedGender, child) {
+                    return DropdownButtonFormField<String>(
+                      value: selectedGender.isEmpty ? null : selectedGender,
+                      decoration: const InputDecoration(
+                        hintText: "เลือกเพศ",
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 16,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.person_outline,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      items: const [
+                        DropdownMenuItem(value: "ชาย", child: Text("ชาย")),
+                        DropdownMenuItem(value: "หญิง", child: Text("หญิง")),
+                        DropdownMenuItem(value: "อื่นๆ", child: Text("อื่นๆ")),
+                      ],
+                      onChanged: (String? value) {
+                        if (value != null) {
+                          _selectedGender.value = value;
+                        }
+                      },
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+
+             
 
               // Sign Up button
               Container(
@@ -207,37 +360,88 @@ class SignUpPage extends StatelessWidget {
                     final password = passwordController.text.trim();
                     final confirmPassword = confirmPasswordController.text
                         .trim();
+                    final fullName = fullNameController.text.trim();
 
+                    // Validation
                     if (email.isEmpty ||
                         password.isEmpty ||
-                        confirmPassword.isEmpty) {
-                      _showMessage(context, "Please fill in all fields");
+                        confirmPassword.isEmpty ||
+                        fullName.isEmpty) {
+                      _showMessage(context, "กรุณากรอกข้อมูลให้ครบถ้วน");
                       return;
                     }
+
                     if (!email.contains('@')) {
-                      _showMessage(context, "Invalid email format");
+                      _showMessage(context, "รูปแบบอีเมลไม่ถูกต้อง");
                       return;
                     }
+
                     if (password != confirmPassword) {
-                      _showMessage(context, "Passwords do not match");
+                      _showMessage(context, "รหัสผ่านไม่ตรงกัน");
+                      return;
+                    }
+
+                    if (password.length < 6) {
+                      _showMessage(
+                        context,
+                        "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร",
+                      );
+                      return;
+                    }
+
+                    if (_selectedDate.value == null) {
+                      _showMessage(context, "กรุณาเลือกวันเดือนปีเกิด");
+                      return;
+                    }
+
+                    if (_selectedGender.value.isEmpty) {
+                      _showMessage(context, "กรุณาเลือกเพศ");
                       return;
                     }
 
                     try {
-                      await FirebaseAuth.instance
+                      // Create user account
+                      UserCredential userCredential = await FirebaseAuth
+                          .instance
                           .createUserWithEmailAndPassword(
                             email: email,
                             password: password,
                           );
-                      _showMessage(context, "Account created for $email");
+
+                      // Save user data to Firestore
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(userCredential.user!.uid)
+                          .set({
+                            'email': email,
+                            'fullName': fullName,
+                            'dateOfBirth': Timestamp.fromDate(
+                              _selectedDate.value!,
+                            ),
+                            'gender': _selectedGender.value,
+                            'createdAt': Timestamp.now(),
+                            'profileImageUrl':
+                                '', // จะอัปเดตภายหลังถ้ามีการอัปโหลดภาพ
+                          });
+
+                      _showMessage(context, "สร้างบัญชีสำเร็จ!");
+
+                      // Navigate to home or login page
+                      if (context.mounted) {
+                        Navigator.pushReplacementNamed(context, '/login');
+                      }
                     } on FirebaseAuthException catch (e) {
-                      String errorMsg = "An error occurred";
+                      String errorMsg = "เกิดข้อผิดพลาด";
                       if (e.code == 'email-already-in-use') {
-                        errorMsg = "This email is already registered";
+                        errorMsg = "อีเมลนี้ถูกใช้งานแล้ว";
                       } else if (e.code == 'weak-password') {
-                        errorMsg = "Password should be at least 6 characters";
+                        errorMsg = "รหัสผ่านไม่แข็งแรงพอ";
+                      } else if (e.code == 'invalid-email') {
+                        errorMsg = "รูปแบบอีเมลไม่ถูกต้อง";
                       }
                       _showMessage(context, errorMsg);
+                    } catch (e) {
+                      _showMessage(context, "เกิดข้อผิดพลาดในการบันทึกข้อมูล");
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -249,7 +453,7 @@ class SignUpPage extends StatelessWidget {
                     elevation: 0,
                   ),
                   child: const Text(
-                    "Sign In",
+                    "สร้างบัญชี",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),

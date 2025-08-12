@@ -68,7 +68,7 @@ class SignInPage extends StatelessWidget {
                 child: TextField(
                   controller: emailController,
                   decoration: const InputDecoration(
-                    hintText: "เมล อีเมล หรือ ชื่อผู้ใช้",
+                    hintText: "อีเมล",
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     prefixIcon: Icon(Icons.person_outline, color: Colors.grey),
