@@ -6,11 +6,14 @@ import '../models/product.dart';
 import 'package:decimal/decimal.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:geolocator/geolocator.dart';
 
 class ProductProvider with ChangeNotifier {
 
   final collection = FirebaseFirestore.instance.collection("products");
   final user = FirebaseAuth.instance.currentUser;
+
+  
 
   final int _limit = 10;
   DocumentSnapshot? _lastDocument; 
@@ -20,6 +23,125 @@ class ProductProvider with ChangeNotifier {
 
   final List<Product> _productsDb = [];
   List<Product> get productsDb => _productsDb;
+
+
+  Position? _currentPosition;
+  double? _distanceInMeters;
+
+  Position? get currentPosition => _currentPosition;
+  double? get distanceInMeters => _distanceInMeters;
+
+ Future<Map<String, dynamic>?> fetchSellerInfo(String sellerId) async {
+  try {
+    final doc = await FirebaseFirestore.instance
+        .collection('userInfos')
+        .doc(sellerId)
+        .get();
+
+    if (doc.exists) {
+      return doc.data(); 
+    } else {
+      print('Seller not found');
+      return null;
+    }
+  } catch (e) {
+    print('Error fetching seller info: $e');
+    return null;
+  }
+}
+
+Future<Map<String, dynamic>?> fetchSellerData(String productId) async {
+  try {
+    final productDoc = await FirebaseFirestore.instance
+        .collection('products')
+        .doc(productId)
+        .get();
+
+    if (!productDoc.exists) {
+      print('Product not found');
+      return null;
+    }
+
+    final productData = productDoc.data();
+    if (productData == null) return null;
+
+    final sellerId = productData['sellerId'] as String?;
+    if (sellerId == null) {
+      print('Seller ID not found in product data');
+      return null;
+    }
+
+    final sellerDoc = await FirebaseFirestore.instance
+        .collection('userInfos')
+        .doc(sellerId)
+        .get();
+
+    if (sellerDoc.exists) {
+      return sellerDoc.data();
+    } else {
+      print('Seller not found');
+      return null;
+    }
+  } catch (e) {
+    print('Error fetching seller data: $e');
+    return null;
+  }
+}
+
+  Future<void> fetchCurrentLocation() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+      permission = await Geolocator.requestPermission();
+      if (permission != LocationPermission.whileInUse && permission != LocationPermission.always) {
+        return;
+      }
+    }
+
+    _currentPosition = await Geolocator.getCurrentPosition();
+    notifyListeners();
+  }
+  
+
+  void calculateDistance(GeoPoint productLocation) {
+    if (_currentPosition == null) {
+      _distanceInMeters = null;
+      notifyListeners();
+      return;
+    }
+    _distanceInMeters = Geolocator.distanceBetween(
+      _currentPosition!.latitude,
+      _currentPosition!.longitude,
+      productLocation.latitude,
+      productLocation.longitude,
+    );
+    notifyListeners();
+  }
+
+Future<Map<String, dynamic>?> fetchProductAndSeller(String productId) async {
+  final productDoc = await FirebaseFirestore.instance.collection('products').doc(productId).get();
+
+  if (!productDoc.exists) return null;
+
+  final productData = productDoc.data();
+  if (productData == null) return null;
+
+  final sellerId = productData['sellerId'] as String?;
+
+  Map<String, dynamic>? sellerData;
+  if (sellerId != null) {
+    final sellerDoc = await FirebaseFirestore.instance.collection('userInfos').doc(sellerId).get();
+    if (sellerDoc.exists) {
+      sellerData = sellerDoc.data();
+    }
+  }
+
+  return {
+    'product': productData,
+    'seller': sellerData,
+  };
+}
+
+
 
   Future<Product?> getProductById(String id) async {
     try {
