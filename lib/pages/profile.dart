@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+import 'package:local_shopee/providers/favorite_provider.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -215,8 +217,6 @@ class ProfilePage extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 20),
-
-                    
 
                     // Icons Row - Cart and Heart with underline and animation
                     ValueListenableBuilder<bool>(
@@ -473,19 +473,48 @@ class ProfilePage extends StatelessWidget {
   }
 
   Widget _buildFavoriteProductsGrid() {
-    return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.75,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-      ),
-      itemCount: 2, // จำนวน placeholder cards สำหรับสินค้าโปรด
-      itemBuilder: (context, index) {
-        return _buildProductCard(
-          title: 'สินค้าโปรด ${index + 1}',
-          price: '฿${180 + (index * 40)}',
-          isUserProduct: false,
+    return Consumer<FavoriteProvider>(
+      builder: (context, favoriteProvider, child) {
+        // ใช้ข้อมูลหลอกๆ เพื่อทดสอบ
+        final favorites = favoriteProvider.getDummyFavoriteProducts();
+
+        if (favorites.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.favorite_border, size: 64, color: Colors.grey[400]),
+                const SizedBox(height: 16),
+                Text(
+                  'ยังไม่มีสินค้าโปรด',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'เพิ่มสินค้าที่ชื่นชอบเข้ารายการโปรด',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return GridView.builder(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 0.75,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+          ),
+          itemCount: favorites.length,
+          itemBuilder: (context, index) {
+            final favorite = favorites[index];
+            return _buildFavoriteProductCard(context, favorite);
+          },
         );
       },
     );
@@ -576,6 +605,200 @@ class ProfilePage extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFavoriteProductCard(
+    BuildContext context,
+    Map<String, dynamic> favorite,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Product Image
+          Expanded(
+            flex: 3,
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.red[50],
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12),
+                ),
+              ),
+              child: Stack(
+                children: [
+                  Center(
+                    child: Icon(
+                      Icons.favorite,
+                      size: 40,
+                      color: Colors.red[300],
+                    ),
+                  ),
+                  // ปุ่มลบออกจากรายการโปรด
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: () {
+                        _removeFromFavorites(context, favorite);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 4,
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.favorite,
+                          size: 16,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Product Info
+          Expanded(
+            flex: 2,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    favorite['productName'] ?? 'ไม่ระบุชื่อ',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '฿${favorite['price']?.toStringAsFixed(0) ?? '0'}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                    ),
+                  ),
+                  const Spacer(),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on, size: 12, color: Colors.grey),
+                      Expanded(
+                        child: Text(
+                          favorite['distance'] ?? '0 กิโลเมตร',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Icon(Icons.star, size: 12, color: Colors.orange),
+                      Text(
+                        favorite['rating']?.toString() ?? '0.0',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _removeFromFavorites(
+    BuildContext context,
+    Map<String, dynamic> favorite,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('ลบออกจากรายการโปรด'),
+        content: Text(
+          'คุณต้องการลบ "${favorite['productName']}" ออกจากรายการโปรดหรือไม่?',
+        ),
+        actions: [
+          TextButton(
+            child: const Text('ยกเลิก'),
+            onPressed: () => Navigator.pop(context),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('ลบ'),
+            onPressed: () async {
+              try {
+                await Provider.of<FavoriteProvider>(
+                  context,
+                  listen: false,
+                ).removeFromFavorites(favorite['productId']);
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'ลบ "${favorite['productName']}" ออกจากรายการโปรดแล้ว',
+                    ),
+                    backgroundColor: Colors.green,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                );
+              } catch (e) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('เกิดข้อผิดพลาด: $e'),
+                    backgroundColor: Colors.red,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                );
+              }
+            },
           ),
         ],
       ),
