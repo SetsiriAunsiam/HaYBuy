@@ -423,7 +423,7 @@ class PublicProfilePage extends StatelessWidget {
 
                     // แสดงหัวข้อสินค้า
                     const Text(
-                      'สินค้าของฉัน',
+                      'สินค้าทั้งหมด',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
