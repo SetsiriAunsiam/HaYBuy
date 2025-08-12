@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
         '/cart': (context) => const CartPage(),
         '/favorite': (context) => const FavoritePage(),
         '/search': (context) => const SearchPage(),
-        '/signin': (context) => const SignInPage(),
+        '/signin': (context) => SignInPage(),
         '/signup': (context) => SignUpPage(),
       },
 
