@@ -12,25 +12,54 @@ class DetailPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Product Details'),
       ),
-      body: Center(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(productItem.name, style: TextStyle(fontSize: 24)),
-            const SizedBox(height: 20),
-            Text( '฿${productItem.price}', style: TextStyle(fontSize: 16)),
-            const SizedBox(height: 20),
-            Text(productItem.location, style: TextStyle(fontSize: 16)),
-            const SizedBox(height: 20),
-            Text('Rating: ${productItem.rating}', style: TextStyle(fontSize: 16)),
-            const SizedBox(height: 20),
-            Text('isFav? : ${productItem.isFavorite}', style: TextStyle(fontSize: 16)),
-            const SizedBox(height: 20),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: Image.network(
+                'https://picsum.photos/200',
+                width: double.infinity,
+                height: 300,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(height: 16.0),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Text(
+                    productItem.name,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: const TextStyle(
+                      fontSize: 35,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Text(
+                  '\$${productItem.price.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontSize: 35,
+                    color: Colors.green,
+                  ),
+                ),
+              ],
+            ),
             
-            
+            const SizedBox(height: 16.0),
+            Text(
+              productItem.name,
+              style: const TextStyle(fontSize: 16),
+            ),
           ],
         ),
-      ),
+      )
     );
+
   }
 }
