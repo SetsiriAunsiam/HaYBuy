@@ -66,8 +66,8 @@ class _ProfilePageState extends State<ProfilePage>
 
     // สำหรับตัวอย่าง จะใช้ products ทั้งหมดเป็นสินค้าที่ลงขาย และ favoriteProducts เป็นสินค้าโปรด
     final userProducts = productProvider.productsDb;
-    final favoriteProducts = productProvider.favoriteProductsDb;
-    final displayProducts = _showUserProducts ? userProducts : favoriteProducts;
+    // final favoriteProducts = productProvider.favoriteProductsDb;
+    // final displayProducts = _showUserProducts ? userProducts : favoriteProducts;
 
     return Scaffold(
       appBar: AppBar(
@@ -157,7 +157,7 @@ class _ProfilePageState extends State<ProfilePage>
                   children: [
                     _buildStatColumn('${userProducts.length}', 'เรทติ้ง'),
                     const SizedBox(width: 40),
-                    _buildStatColumn('${favoriteProducts.length}', 'ผู้ติดตาม'),
+                    // _buildStatColumn('${favoriteProducts.length}', 'ผู้ติดตาม'),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -251,62 +251,62 @@ class _ProfilePageState extends State<ProfilePage>
           const Divider(thickness: 1),
 
           // Products Grid with Animation
-          Expanded(
-            child: displayProducts.isEmpty
-                ? const Center(
-                    child: Text(
-                      'ไม่มีสินค้า',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                  )
-                : AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 400),
-                    transitionBuilder:
-                        (Widget child, Animation<double> animation) {
-                          return FadeTransition(
-                            opacity: animation,
-                            child: SlideTransition(
-                              position:
-                                  Tween<Offset>(
-                                    begin: const Offset(0.2, 0),
-                                    end: Offset.zero,
-                                  ).animate(
-                                    CurvedAnimation(
-                                      parent: animation,
-                                      curve: Curves.easeInOut,
-                                    ),
-                                  ),
-                              child: child,
-                            ),
-                          );
-                        },
-                    child: Padding(
-                      key: ValueKey(
-                        _showUserProducts,
-                      ), // Key สำหรับ AnimatedSwitcher
-                      padding: const EdgeInsets.all(16),
-                      child: GridView.builder(
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              childAspectRatio: 0.75,
-                              crossAxisSpacing: 12,
-                              mainAxisSpacing: 12,
-                            ),
-                        itemCount: displayProducts.length,
-                        itemBuilder: (context, index) {
-                          return AnimatedContainer(
-                            duration: Duration(
-                              milliseconds: 100 + (index * 50),
-                            ),
-                            curve: Curves.easeOutBack,
-                            child: ProductCard(product: displayProducts[index]),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-          ),
+          // Expanded(
+          //   child: displayProducts.isEmpty
+          //       ? const Center(
+          //           child: Text(
+          //             'ไม่มีสินค้า',
+          //             style: TextStyle(fontSize: 16, color: Colors.grey),
+          //           ),
+          //         )
+          //       : AnimatedSwitcher(
+          //           duration: const Duration(milliseconds: 400),
+          //           transitionBuilder:
+          //               (Widget child, Animation<double> animation) {
+          //                 return FadeTransition(
+          //                   opacity: animation,
+          //                   child: SlideTransition(
+          //                     position:
+          //                         Tween<Offset>(
+          //                           begin: const Offset(0.2, 0),
+          //                           end: Offset.zero,
+          //                         ).animate(
+          //                           CurvedAnimation(
+          //                             parent: animation,
+          //                             curve: Curves.easeInOut,
+          //                           ),
+          //                         ),
+          //                     child: child,
+          //                   ),
+          //                 );
+          //               },
+          //           child: Padding(
+          //             key: ValueKey(
+          //               _showUserProducts,
+          //             ), // Key สำหรับ AnimatedSwitcher
+          //             padding: const EdgeInsets.all(16),
+          //             child: GridView.builder(
+          //               gridDelegate:
+          //                   const SliverGridDelegateWithFixedCrossAxisCount(
+          //                     crossAxisCount: 2,
+          //                     childAspectRatio: 0.75,
+          //                     crossAxisSpacing: 12,
+          //                     mainAxisSpacing: 12,
+          //                   ),
+          //               itemCount: displayProducts.length,
+          //               itemBuilder: (context, index) {
+          //                 return AnimatedContainer(
+          //                   duration: Duration(
+          //                     milliseconds: 100 + (index * 50),
+          //                   ),
+          //                   curve: Curves.easeOutBack,
+          //                   child: ProductCard(product: displayProducts[index]),
+          //                 );
+          //               },
+          //             ),
+          //           ),
+          //         ),
+          // ),
         ],
       ),
     );

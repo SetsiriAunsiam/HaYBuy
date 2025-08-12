@@ -18,9 +18,15 @@ class HomePage extends StatelessWidget {
               context.read<ProductProvider>().loadMoreProducts();
               return true;
             }
+
+            if (scrollNotification.metrics.pixels == 0) {
+              context.read<ProductProvider>().refreshProducts();
+              return true;
+            }
             return false;
           },
-          child: GridView.builder(
+          child: RefreshIndicator(
+            child: GridView.builder(
                 padding: const EdgeInsets.all(20),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
@@ -33,13 +39,27 @@ class HomePage extends StatelessWidget {
                   return ProductCard(product: productsDb[index]);
                 },
               ),
+            onRefresh: () => context.read<ProductProvider>().refreshProducts(), 
+            // GridView.builder(
+            //     padding: const EdgeInsets.all(20),
+            //     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            //       crossAxisCount: 2,
+            //       crossAxisSpacing: 2,
+            //       mainAxisSpacing: 5,
+            //       childAspectRatio: 0.7,
+            //     ),
+            //     itemCount: productsDb.length,
+            //     itemBuilder: (context, index) {
+            //       return ProductCard(product: productsDb[index]);
+            //     },
+            //   ),
 
         )
         
         
               
         
-      );
+      ));
     
   }
 }

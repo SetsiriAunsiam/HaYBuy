@@ -18,7 +18,6 @@ class ProductProvider with ChangeNotifier {
 
   final List<Product> _productsDb = [];
   List<Product> get productsDb => _productsDb;
-  List<Product> get favoriteProductsDb => _productsDb.where((p) => p.isFavorite).toList();
 
   ProductProvider() {
     loadMoreProducts();
@@ -44,6 +43,12 @@ class ProductProvider with ChangeNotifier {
   //   });
   // }
 
+  Future<void> refreshProducts() async {
+    _productsDb.clear();
+    _lastDocument = null;
+    _hasMore = true;
+    await loadMoreProducts();
+  }
 
   Future<void> loadMoreProducts() async {
     if (!_hasMore) return;
@@ -61,14 +66,20 @@ class ProductProvider with ChangeNotifier {
         final existingIndex = _productsDb.indexWhere((p) => p.id == doc.id);
         if (existingIndex == -1) {
           final data = doc.data() as Map<String, dynamic>;
-          _productsDb.add(Product(
-            id: doc.id,
-            name: data['name'] ?? 'Unknown',
-            location: data['location'] ?? 'Unknown',
-            price: Decimal.parse(data['price']?.toString() ?? '0'),
-            rating: Decimal.parse(data['rating']?.toString() ?? '0'),
-            isFavorite: data['isFavorite'] ?? false,
-          ));
+          _productsDb.add(
+            Product(
+              id: doc.id,
+              name: data['name'] ?? 'Unknown',
+              description: data['description'] ?? '',
+              category: data['category'] ?? '',
+              imageUrl: data['imageUrl'] ?? '',
+              sellerId: data['sellerId'] ?? user?.uid ?? 'unknown',
+              location: data['location'] ?? GeoPoint(0.0, 0.0),
+              price: Decimal.parse(data['price']?.toString() ?? '0'),
+              rating: Decimal.parse(data['rating']?.toString() ?? '0'),
+              status: data['status'] ?? 'available',
+            )
+          );
         }
       }
       notifyListeners();
@@ -78,79 +89,47 @@ class ProductProvider with ChangeNotifier {
     } else {
       _hasMore = false;
     }
-
-    // try {
-    //   final snapshot = await collection.get();
-    //   _productsDb.clear();
-    //   for (var doc in snapshot.docs) {
-    //     final data = doc.data();
-    //     _productsDb.add(Product(
-    //       id: doc.id,
-    //       name: data['name'] ?? 'Unknown',
-    //       location: data['location'] ?? 'Unknown',
-    //       price: Decimal.parse(data['price']?.toString() ?? '0'),
-    //       rating: Decimal.parse(data['rating']?.toString() ?? '0'),
-    //       isFavorite: data['isFavorite'] ?? false,
-    //     ));
-    //   }
-    //   notifyListeners();
-    // } catch (e) {
-    //   print('Error loading products: $e');
-    // }
   }
 
-//  void stopListening() {
-//     _subscription?.cancel();
-//   }
-
-  void toggleFavoriteDb(String id) async {
-    final index = _productsDb.indexWhere((p) => p.id == id);
-    if (index == -1) return;
-
-    _productsDb[index].isFavorite = !_productsDb[index].isFavorite;
-    notifyListeners();
-    print(_productsDb.length);
-
-    final item = collection.doc(id);
-    final doc = await item.get();
-    if (doc.exists) {
-      final isFavorite = doc.data()?['isFavorite'] ?? false;
-      try {
-        await item.update({'isFavorite': _productsDb[index].isFavorite});
-        print('fav by ${user?.uid} : ${_productsDb[index].isFavorite}');
-      } catch (e) {
-        print('Error updating favorite status: $e');
-        _productsDb[index].isFavorite = isFavorite;
-        notifyListeners();
-      }
-    } else {
-      print('Document does not exist');
-    }
-  }
-
-  addProduct() async {
+  Future<void> addProduct(Product product) async {
     try {
-      final product = Product(
-        id: user?.uid ?? 'null',
-        name: 'New Product',
-        location: 'คอหงส์',
-        price: Decimal.fromInt(100),
-        rating: Decimal.fromInt(4),
-      );
       await collection.add({
-        'id': user?.uid ?? 'null',
         'name': product.name,
+        'description': product.description,
+        'category': product.category,
+        'imageUrl': product.imageUrl,
+        'sellerId': user?.uid ?? 'unknown',
         'location': product.location,
         'price': product.price.toString(),
         'rating': product.rating.toString(),
-        'isFavorite': false,
+        'status': product.status,
       });
-      _productsDb.add(product);
-      print('Product added: ${product.name} by ${user?.uid}');
+      notifyListeners();
     } catch (e) {
       print('Error adding product: $e');
     }
-    notifyListeners();
   }
+
+  Future<void> addTestProduct() async {
+    try {
+      await collection.add({
+        'id': DateTime.now().millisecondsSinceEpoch.toString(),
+        'name': 'test1',
+        'description': 'test1description',
+        'category': 'test',
+        'imageUrl': 'https://example.com/image.jpg',
+        'sellerId': user?.uid ?? 'unknown',
+        'location': GeoPoint(0.0, 0.0),
+        'price': Decimal.parse('100.00').toString(),
+        'rating': Decimal.parse('4.5').toString(),
+        'createdAt': FieldValue.serverTimestamp(),
+        'status': 'ขาย',
+      });
+      notifyListeners();
+    } catch (e) {
+      print('Error adding product: $e');
+    }
+  }
+
 
 }
