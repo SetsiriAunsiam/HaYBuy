@@ -22,6 +22,55 @@ class ProfilePage extends StatelessWidget {
     return null;
   }
 
+  // เพิ่ม Stream สำหรับ real-time updates
+  Stream<DocumentSnapshot> getUserDataStream() {
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+    return FirebaseFirestore.instance.collection('users').doc(uid).snapshots();
+  }
+
+  // ฟังก์ชันสำหรับ Toggle Follow
+  Future<void> _toggleFollow(String profileUserId, String currentUserId) async {
+    final docRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(profileUserId);
+
+    final snapshot = await docRef.get();
+    if (!snapshot.exists) return;
+
+    List followers = snapshot.data()?['followers'] ?? [];
+
+    if (followers.contains(currentUserId)) {
+      // เลิกติดตาม
+      followers.remove(currentUserId);
+    } else {
+      // ติดตาม
+      followers.add(currentUserId);
+    }
+
+    await docRef.update({'followers': followers});
+  }
+
+  // ฟังก์ชันสำหรับให้เรทติ้ง
+  Future<void> _setRating(
+    String profileUserId,
+    String currentUserId,
+    double rating,
+  ) async {
+    final docRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(profileUserId);
+
+    final snapshot = await docRef.get();
+    if (!snapshot.exists) return;
+
+    Map<String, dynamic> ratings = Map<String, dynamic>.from(
+      snapshot.data()?['ratings'] ?? {},
+    );
+    ratings[currentUserId] = rating;
+
+    await docRef.update({'ratings': ratings});
+  }
+
   int calculateAge(Timestamp dateOfBirth) {
     DateTime birthDate = dateOfBirth.toDate();
     DateTime today = DateTime.now();
@@ -46,32 +95,39 @@ class ProfilePage extends StatelessWidget {
         elevation: 0,
         automaticallyImplyLeading: false, // ลบ arrow icon
         actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'logout') {
-                FirebaseAuth.instance.signOut();
-              }
-            },
-            itemBuilder: (BuildContext context) {
-              return [
-                const PopupMenuItem<String>(
-                  value: 'logout',
-                  child: Row(
-                    children: [
-                      Icon(Icons.logout, color: Colors.red),
-                      SizedBox(width: 8),
-                      Text('ออกจากระบบ'),
-                    ],
-                  ),
-                ),
-              ];
-            },
+          // Settings button
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              onPressed: () {
+                try {
+                  Navigator.pushNamed(context, '/setting');
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('ไม่สามารถเปิดหน้าตั้งค่าได้'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              icon: const Icon(
+                Icons.settings_outlined,
+                color: Colors.black,
+                size: 24,
+              ),
+              tooltip: 'ตั้งค่า',
+            ),
           ),
         ],
       ),
       backgroundColor: Colors.white,
-      body: FutureBuilder<Map<String, dynamic>?>(
-        future: getUserData(),
+      body: StreamBuilder<DocumentSnapshot>(
+        stream: getUserDataStream(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -79,11 +135,27 @@ class ProfilePage extends StatelessWidget {
           if (snapshot.hasError) {
             return Center(child: Text("Error: ${snapshot.error}"));
           }
-          if (!snapshot.hasData || snapshot.data == null) {
+          if (!snapshot.hasData || !snapshot.data!.exists) {
             return const Center(child: Text("No user data found"));
           }
 
-          var userData = snapshot.data!;
+          var userData = snapshot.data!.data() as Map<String, dynamic>;
+
+          // คำนวณข้อมูลเรทติ้งและผู้ติดตาม
+          final followers = List<String>.from(userData['followers'] ?? []);
+          final ratings = Map<String, dynamic>.from(userData['ratings'] ?? {});
+
+          double avgRating = ratings.isNotEmpty
+              ? ratings.values
+                        .map((e) => e.toDouble())
+                        .reduce((a, b) => a + b) /
+                    ratings.length
+              : 0.0;
+
+          final currentUserId = FirebaseAuth.instance.currentUser!.uid;
+          bool isOwnProfile =
+              currentUserId == FirebaseAuth.instance.currentUser!.uid;
+
           return Column(
             children: [
               // Profile Header
@@ -117,27 +189,34 @@ class ProfilePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
 
-                    // Stats Row
+                    // Stats Row - ใช้ข้อมูลจริงจาก Firestore
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _buildStatColumn('5', 'เรทติ้ง'),
+                        GestureDetector(
+                          onTap: () {
+                            // คลิกที่เรทติ้งเพื่อให้คะแนน
+                            double myRating =
+                                ratings[currentUserId]?.toDouble() ?? 0.0;
+                            _showRatingDialog(
+                              context,
+                              currentUserId,
+                              currentUserId,
+                              myRating,
+                            );
+                          },
+                          child: _buildStatColumn(
+                            avgRating.toStringAsFixed(1),
+                            'เรทติ้ง',
+                          ),
+                        ),
                         const SizedBox(width: 40),
-                        _buildStatColumn('10', 'ผู้ติดตาม'),
+                        _buildStatColumn('${followers.length}', 'ผู้ติดตาม'),
                       ],
                     ),
                     const SizedBox(height: 20),
 
-                    // Action Buttons
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _buildActionButton('ติดตาม'),
-                        const SizedBox(width: 16),
-                        _buildActionButton('พูดคุย'),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
+                    
 
                     // Icons Row - Cart and Heart with underline and animation
                     ValueListenableBuilder<bool>(
@@ -259,6 +338,89 @@ class ProfilePage extends StatelessWidget {
             ],
           );
         },
+      ),
+    );
+  }
+
+  // ฟังก์ชันแสดง Dialog สำหรับให้เรทติ้ง
+  void _showRatingDialog(
+    BuildContext context,
+    String profileUserId,
+    String currentUserId,
+    double currentRating,
+  ) {
+    double tempRating = currentRating;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text('ให้คะแนนผู้ใช้'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'คะแนนปัจจุบัน: ${tempRating.toStringAsFixed(1)}',
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 16),
+              Slider(
+                value: tempRating,
+                min: 0,
+                max: 5,
+                divisions: 50,
+                label: tempRating.toStringAsFixed(1),
+                activeColor: Colors.green,
+                onChanged: (value) {
+                  setState(() {
+                    tempRating = value;
+                  });
+                },
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('0', style: TextStyle(color: Colors.grey[600])),
+                  Text('5', style: TextStyle(color: Colors.grey[600])),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: const Text('ยกเลิก'),
+              onPressed: () => Navigator.pop(context),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('ให้คะแนน'),
+              onPressed: () async {
+                await _setRating(profileUserId, currentUserId, tempRating);
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'ให้คะแนน ${tempRating.toStringAsFixed(1)} เรียบร้อยแล้ว',
+                    ),
+                    backgroundColor: Colors.green,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
