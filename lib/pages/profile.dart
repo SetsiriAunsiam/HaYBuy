@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:local_shopee/providers/product_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:local_shopee/providers/favorite_provider.dart';
 
@@ -89,6 +90,14 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    final productProvider = Provider.of<ProductProvider>(context);
+
+    // สำหรับตัวอย่าง จะใช้ products ทั้งหมดเป็นสินค้าที่ลงขาย และ favoriteProducts เป็นสินค้าโปรด
+    final userProducts = productProvider.productsDb;
+    // final favoriteProducts = productProvider.favoriteProductsDb;
+    // final displayProducts = _showUserProducts ? userProducts : favoriteProducts;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("โปรไฟล์"),
