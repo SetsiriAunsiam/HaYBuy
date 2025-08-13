@@ -188,7 +188,7 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 10 ),
-                
+                Divider(thickness: 1),
                 Expanded(
                   child: GridView.builder(
                     padding: const EdgeInsets.all(20),

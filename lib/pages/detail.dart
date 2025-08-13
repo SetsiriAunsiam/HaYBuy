@@ -25,7 +25,7 @@ class DetailPage extends StatelessWidget {
         ],
       ),
       body: FutureBuilder(
-        future: productRef.get(), 
+        future: context.read<ProductProvider>().fetchProductAndSeller(productId), 
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -37,7 +37,9 @@ class DetailPage extends StatelessWidget {
             return const Center(child: Text('Product not found'));
           }
 
-          final productData = snapshot.data!.data() as Map<String, dynamic>;
+          // final productData = snapshot.data!.data() as Map<String, dynamic>;
+          final productData = snapshot.data!['product'] as Map<String, dynamic>;
+          final sellerData = snapshot.data!['seller'] as Map<String, dynamic>?;
           final productLocation = productData['location'] as GeoPoint? ?? GeoPoint(0, 0);
 
           final locationProvider = Provider.of<ProductProvider>(context);
@@ -247,14 +249,15 @@ class DetailPage extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('ผู้ขาย', 
-                          style: TextStyle(
+                        Text(
+                          '${sellerData != null ? sellerData['firstName'] : 'ไม่พบข้อมูลผู้ขาย'}', 
+                          style: const TextStyle(
                             fontSize: 20, 
                             fontWeight: FontWeight.bold
                           )
                         ),
                         Text(
-                          productData['sellerName'] ?? 'ไม่ทราบชื่อผู้ขาย',
+                          '${sellerData != null ? sellerData['fullName'] : 'ไม่พบข้อมูลผู้ขาย'}', 
                           style: const TextStyle(fontSize: 16),
                         ),
                       ],

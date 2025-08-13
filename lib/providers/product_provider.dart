@@ -129,7 +129,7 @@ Future<Map<String, dynamic>?> fetchProductAndSeller(String productId) async {
 
   Map<String, dynamic>? sellerData;
   if (sellerId != null) {
-    final sellerDoc = await FirebaseFirestore.instance.collection('userInfos').doc(sellerId).get();
+    final sellerDoc = await FirebaseFirestore.instance.collection('users').doc(sellerId).get();
     if (sellerDoc.exists) {
       sellerData = sellerDoc.data();
     }
