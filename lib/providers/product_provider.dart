@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 // import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -6,14 +7,32 @@ import '../models/product.dart';
 import 'package:decimal/decimal.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProductProvider with ChangeNotifier {
+  File? _imageFile;
+  bool _isSubmitting = false;
+
+  // Getter สำหรับให้ UI ดึงค่าไปใช้
+  File? get imageFile => _imageFile;
+  bool get isSubmitting => _isSubmitting;
+
+  // Logic การเลือกรูปภาพ
+  Future<void> pickImage() async {
+    final pickedFile = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+    );
+    if (pickedFile != null) {
+      _imageFile = File(pickedFile.path);
+      notifyListeners();
+    }
+  }
 
   final collection = FirebaseFirestore.instance.collection("products");
   final user = FirebaseAuth.instance.currentUser;
 
   final int _limit = 10;
-  DocumentSnapshot? _lastDocument; 
+  DocumentSnapshot? _lastDocument;
   bool _hasMore = true;
 
   bool get hasmore => _hasMore;
@@ -60,7 +79,7 @@ class ProductProvider with ChangeNotifier {
     }
     final snapshot = await query.get();
     print('Load products: new docs ${snapshot.docs.length}');
-    print('Current productsDb length: ${_productsDb.length}');  
+    print('Current productsDb length: ${_productsDb.length}');
 
     if (snapshot.docs.isNotEmpty) {
       _lastDocument = snapshot.docs.last;
@@ -80,12 +99,12 @@ class ProductProvider with ChangeNotifier {
               price: Decimal.parse(data['price']?.toString() ?? '0'),
               rating: Decimal.parse(data['rating']?.toString() ?? '0'),
               status: data['status'] ?? 'available',
-            )
+            ),
           );
         }
       }
       notifyListeners();
-      if(snapshot.docs.length < _limit) {
+      if (snapshot.docs.length < _limit) {
         _hasMore = false;
       }
     } else {
@@ -93,22 +112,37 @@ class ProductProvider with ChangeNotifier {
     }
   }
 
-  Future<void> addProduct(Product product) async {
+  Future<bool> submitProduct(
+    Product product) async {
+    if (_imageFile == null) {
+      return false;
+    }
+
+    _isSubmitting = true;
+    notifyListeners();
     try {
       await collection.add({
+        'id': DateTime.now().millisecondsSinceEpoch.toString(),
         'name': product.name,
         'description': product.description,
         'category': product.category,
-        'imageUrl': product.imageUrl,
+        'imageUrl': 'https://example.com/image.jpg',
         'sellerId': user?.uid ?? 'unknown',
         'location': product.location,
         'price': product.price.toString(),
-        'rating': product.rating.toString(),
-        'status': product.status,
+        'rating': Decimal.parse('0.0').toString(),
+        'createdAt': FieldValue.serverTimestamp(),
+        'status': 'ขาย',
       });
+      _isSubmitting = false;
+      _imageFile = null;
       notifyListeners();
+      return true;
     } catch (e) {
       print('Error adding product: $e');
+      _isSubmitting = false;
+      notifyListeners();
+      return false;
     }
   }
 
@@ -132,6 +166,4 @@ class ProductProvider with ChangeNotifier {
       print('Error adding product: $e');
     }
   }
-
-
 }

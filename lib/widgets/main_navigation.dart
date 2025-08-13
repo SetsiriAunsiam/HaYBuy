@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:local_shopee/pages/create_product.dart';
 import 'package:local_shopee/pages/search.dart';
 import 'package:local_shopee/providers/navigation_provider.dart';
 import 'package:local_shopee/providers/product_provider.dart';
@@ -13,7 +14,7 @@ class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   final List<String> appBarTitle = const [
-    "Market",
+    "Home",
     "Search",
     "",
     "Favorite",
@@ -24,7 +25,7 @@ class HomeScreen extends StatelessWidget {
     HomePage(),
     SearchPage(),
     SizedBox.shrink(), // Placeholder for the middle button
-    CartPage(),
+    CreateProductPage(),
     ProfilePage(), // Replace placeholder with actual ProfilePage
   ];
 
