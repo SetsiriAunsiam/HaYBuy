@@ -40,6 +40,30 @@ class ProductProvider with ChangeNotifier {
   final List<Product> _productsDb = [];
   List<Product> get productsDb => _productsDb;
 
+  Future<Product?> getProductById(String id) async {
+    try {
+      final doc = await collection.doc(id).get();
+      if (doc.exists) {
+        final data = doc.data() as Map<String, dynamic>;
+        return Product(
+          id: doc.id,
+          name: data['name'] ?? 'Unknown',
+          description: data['description'] ?? '',
+          category: data['category'] ?? '',
+          imageUrl: data['imageUrl'] ?? '',
+          sellerId: data['sellerId'] ?? user?.uid ?? 'unknown',
+          location: data['location'] ?? GeoPoint(0.0, 0.0),
+          price: Decimal.parse(data['price'] ?? 0),
+          rating: Decimal.parse(data['rating']?.toString() ?? '0'),
+          status: data['status'] ?? 'available',
+        );
+      }
+    } catch (e) {
+      print('Error fetching product by ID: $e');
+    }
+    return null;
+  }
+
   ProductProvider() {
     loadMoreProducts();
     // startListening();
@@ -99,8 +123,8 @@ class ProductProvider with ChangeNotifier {
               price: Decimal.parse(data['price']?.toString() ?? '0'),
               rating: Decimal.parse(data['rating']?.toString() ?? '0'),
               status: data['status'] ?? 'available',
-            ),
-          );
+            )
+          );  
         }
       }
       notifyListeners();
@@ -156,11 +180,11 @@ class ProductProvider with ChangeNotifier {
         'imageUrl': 'https://example.com/image.jpg',
         'sellerId': user?.uid ?? 'unknown',
         'location': GeoPoint(0.0, 0.0),
-        'price': Decimal.parse('100.00').toString(),
-        'rating': Decimal.parse('4.5').toString(),
+        'price': 150,
         'createdAt': FieldValue.serverTimestamp(),
         'status': 'ขาย',
       });
+      print('Product added successfully');
       notifyListeners();
     } catch (e) {
       print('Error adding product: $e');

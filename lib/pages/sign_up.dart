@@ -14,7 +14,6 @@ class SignUpPage extends StatelessWidget {
   final ValueNotifier<bool> _isPasswordVisible = ValueNotifier<bool>(false);
   final ValueNotifier<DateTime?> _selectedDate = ValueNotifier<DateTime?>(null);
   final ValueNotifier<String> _selectedGender = ValueNotifier<String>('');
-  final ValueNotifier<String?> _profileImagePath = ValueNotifier<String?>(null);
 
   @override
   Widget build(BuildContext context) {
@@ -349,8 +348,6 @@ class SignUpPage extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-             
-
               // Sign Up button
               Container(
                 height: 50,
@@ -419,16 +416,16 @@ class SignUpPage extends StatelessWidget {
                               _selectedDate.value!,
                             ),
                             'gender': _selectedGender.value,
-                            'createdAt': Timestamp.now(),
-                            'profileImageUrl':
-                                '', // จะอัปเดตภายหลังถ้ามีการอัปโหลดภาพ
+                            'createdAt': Timestamp.now(),// จะอัปเดตภายหลังถ้ามีการอัปโหลดภาพ
+                            'followers': [], // รายการผู้ติดตาม
+                            'ratings': {}, // คะแนนเรทติ้งจากผู้ใช้อื่น
                           });
 
                       _showMessage(context, "สร้างบัญชีสำเร็จ!");
 
                       // Navigate to home or login page
                       if (context.mounted) {
-                        Navigator.pushReplacementNamed(context, '/login');
+                        Navigator.pushReplacementNamed(context, '/signin');
                       }
                     } on FirebaseAuthException catch (e) {
                       String errorMsg = "เกิดข้อผิดพลาด";

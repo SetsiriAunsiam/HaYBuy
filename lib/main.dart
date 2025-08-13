@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:local_shopee/pages/cart.dart';
 import 'package:local_shopee/pages/detail.dart';
 import 'package:local_shopee/pages/favorite.dart';
+import 'package:local_shopee/pages/setting.dart';
 import 'package:local_shopee/pages/sign_in.dart';
 import 'package:local_shopee/pages/sign_up.dart';
+import 'package:local_shopee/pages/public_profile.dart';
 import 'package:local_shopee/providers/authentication_provider.dart';
+import 'package:local_shopee/providers/favorite_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:local_shopee/providers/product_provider.dart';
 import 'providers/navigation_provider.dart';
@@ -29,9 +32,10 @@ void main() async {
         ChangeNotifierProvider(create: (context) => ProductProvider()),
         ChangeNotifierProvider(create: (context) => NavigationProvider()),
         ChangeNotifierProvider(create: (context) => SearchProvider()),
+        ChangeNotifierProvider(create: (context) => FavoriteProvider()),
         // ChangeNotifierProvider(create: (context) => Product()),
       ],
-      child: const MyApp(), 
+      child: const MyApp(),
     ),
   );
 }
@@ -52,6 +56,17 @@ class MyApp extends StatelessWidget {
         '/search': (context) => const SearchPage(),
         '/signin': (context) => SignInPage(),
         '/signup': (context) => SignUpPage(),
+        '/setting': (context) => SettingsPage(),
+      },
+      onGenerateRoute: (settings) {
+        // Route สำหรับ PublicProfilePage ที่รับ userId เป็น parameter
+        if (settings.name == '/public_profile') {
+          final String userId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => PublicProfilePage(profileUserId: userId),
+          );
+        }
+        return null;
       },
 
       debugShowCheckedModeBanner: false, // ซ่อนแถบ debug
