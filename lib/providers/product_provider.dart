@@ -31,63 +31,6 @@ class ProductProvider with ChangeNotifier {
   Position? get currentPosition => _currentPosition;
   double? get distanceInMeters => _distanceInMeters;
 
- Future<Map<String, dynamic>?> fetchSellerInfo(String sellerId) async {
-  try {
-    final doc = await FirebaseFirestore.instance
-        .collection('userInfos')
-        .doc(sellerId)
-        .get();
-
-    if (doc.exists) {
-      return doc.data(); 
-    } else {
-      print('Seller not found');
-      return null;
-    }
-  } catch (e) {
-    print('Error fetching seller info: $e');
-    return null;
-  }
-}
-
-Future<Map<String, dynamic>?> fetchSellerData(String productId) async {
-  try {
-    final productDoc = await FirebaseFirestore.instance
-        .collection('products')
-        .doc(productId)
-        .get();
-
-    if (!productDoc.exists) {
-      print('Product not found');
-      return null;
-    }
-
-    final productData = productDoc.data();
-    if (productData == null) return null;
-
-    final sellerId = productData['sellerId'] as String?;
-    if (sellerId == null) {
-      print('Seller ID not found in product data');
-      return null;
-    }
-
-    final sellerDoc = await FirebaseFirestore.instance
-        .collection('userInfos')
-        .doc(sellerId)
-        .get();
-
-    if (sellerDoc.exists) {
-      return sellerDoc.data();
-    } else {
-      print('Seller not found');
-      return null;
-    }
-  } catch (e) {
-    print('Error fetching seller data: $e');
-    return null;
-  }
-}
-
   Future<void> fetchCurrentLocation() async {
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
@@ -140,32 +83,6 @@ Future<Map<String, dynamic>?> fetchProductAndSeller(String productId) async {
     'seller': sellerData,
   };
 }
-
-
-
-  Future<Product?> getProductById(String id) async {
-    try {
-      final doc = await collection.doc(id).get();
-      if (doc.exists) {
-        final data = doc.data() as Map<String, dynamic>;
-        return Product(
-          id: doc.id,
-          name: data['name'] ?? 'Unknown',
-          description: data['description'] ?? '',
-          category: data['category'] ?? '',
-          imageUrl: data['imageUrl'] ?? '',
-          sellerId: data['sellerId'] ?? user?.uid ?? 'unknown',
-          location: data['location'] ?? GeoPoint(0.0, 0.0),
-          price: Decimal.parse(data['price'] ?? 0),
-          rating: Decimal.parse(data['rating']?.toString() ?? '0'),
-          status: data['status'] ?? 'available',
-        );
-      }
-    } catch (e) {
-      print('Error fetching product by ID: $e');
-    }
-    return null;
-  }
 
   ProductProvider() {
     loadMoreProducts();

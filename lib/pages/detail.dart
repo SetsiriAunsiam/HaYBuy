@@ -9,9 +9,7 @@ class DetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-  // final productItem = ModalRoute.of(context)?.settings.arguments as Product;
   final productId = ModalRoute.of(context)?.settings.arguments as String;
-  final productRef = FirebaseFirestore.instance.collection('products').doc(productId);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Product Details'),
@@ -19,7 +17,7 @@ class DetailPage extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.share),
             onPressed: () {
-              // Handle favorite action
+
             },
           ),
         ],
@@ -37,10 +35,22 @@ class DetailPage extends StatelessWidget {
             return const Center(child: Text('Product not found'));
           }
 
-          // final productData = snapshot.data!.data() as Map<String, dynamic>;
+ 
           final productData = snapshot.data!['product'] as Map<String, dynamic>;
           final sellerData = snapshot.data!['seller'] as Map<String, dynamic>?;
           final productLocation = productData['location'] as GeoPoint? ?? GeoPoint(0, 0);
+
+          final totalReviews = sellerData?['oneStar'] + 
+                        sellerData?['twoStar'] + 
+                        sellerData?['threeStar'] + 
+                        sellerData?['fourStar'] + 
+                        sellerData?['fiveStar'] ?? 0;
+          final rating = (sellerData?['oneStar']*1 + 
+                        sellerData?['twoStar']*2 + 
+                        sellerData?['threeStar']*3 + 
+                        sellerData?['fourStar']*4 + 
+                        sellerData?['fiveStar']*5) / totalReviews ?? 0.0;
+          
 
           final locationProvider = Provider.of<ProductProvider>(context);
 
@@ -195,7 +205,8 @@ class DetailPage extends StatelessWidget {
                           )
                         ),
                         
-                        Text('4.5', 
+                        Text(
+                          '${rating.toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontSize: 50, 
                           fontWeight: FontWeight.bold
@@ -213,14 +224,14 @@ class DetailPage extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('จำนวนผู้ซื้อ', 
+                        const Text('จำนวนรีวิว', 
                           style: TextStyle(
                             fontSize: 20, 
                             fontWeight: FontWeight.bold
                           )
                         ),
                         Text(
-                          productData['buyerCount']?.toString() ?? '0',
+                          '$totalReviews',
                           style: const TextStyle(
                             fontSize: 20, 
                             fontWeight: FontWeight.bold
